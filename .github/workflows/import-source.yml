@@ -1,0 +1,32 @@
+name: Import verified source snapshot
+on:
+  push:
+    branches: [main]
+    paths: ['.import/READY']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: blimpy-source-import
+  cancel-in-progress: false
+jobs:
+  import:
+    if: github.repository == 'KyleJKistner/blimpy'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify and unpack source snapshot
+        run: python3 .import/unpack.py
+      - name: Commit imported source without rewriting history
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engineering marketing reviews artifact_inventory.json
+          if git diff --cached --quiet; then
+            echo 'Source snapshot already imported.'
+          else
+            git commit -m 'Import engineering revisions, film source, and Opus review brief'
+            git push origin HEAD:main
+          fi
