@@ -1,0 +1,4 @@
+dt_s,layout,wind_m_s,max_lateral_error_m,final_lateral_error_m,first_1m_travel_s,force_limit_assumed_g,perfect_state_sensing
+0.04,four,0.3,0.11265011748125654,-2.7440004332375924e-05,,4.0,True
+0.02,four,0.3,0.11265017971371248,-2.7601403691198876e-05,,4.0,True
+0.01,four,0.3,0.11265023497959717,-2.7682098079574136e-05,,4.0,True

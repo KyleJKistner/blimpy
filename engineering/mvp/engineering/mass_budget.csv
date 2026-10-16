@@ -1,0 +1,15 @@
+item,mass_g,basis,source_or_note
+Envelope incl. valve,32,Engineering allowance; measure sample,Envelope unknown; must close by actual lift test
+Camera/mic/Wi-Fi board and antenna,5,Engineering allocation,Seeed113991115
+RP2040 safety controller,3,Engineering allocation,Seeed102010428
+Protected 1200mAh battery,23,Manufacturer mass,https://www.adafruit.com/product/258
+MAX98357A,1.2,Manufacturer mass,https://www.adafruit.com/product/3006
+Speaker,3,Manufacturer mass,https://www.adafruit.com/product/3923
+Three 7mm motors,8.1,3 x manufacturer 2.7g,https://www.bitcraze.io/documentation/hardware/motor_7mm/motor_7mm-datasheet.pdf
+Props / guards / mounts,5.5,Engineering allocation,Guards must be made and weighed
+Two DRV8833 boards,2,2 x manufacturer 1g,https://www.pololu.com/product/2130
+VL53L1X,0.5,Manufacturer mass without headers,https://www.pololu.com/product/3415
+IMU and mounting allowance,2,0.6g board plus allowance,https://www.pololu.com/product/2798
+Charger plus boost,5,Manufacturer masses 4g+1g,https://www.adafruit.com/product/6091 ; https://www.adafruit.com/product/4654
+Frame / wiring / dock / thermal sensor,10,Engineering allocation,Must include current limiter and interlock hardware
+Unallocated build contingency,5,Engineering allowance,Not payload or ballast

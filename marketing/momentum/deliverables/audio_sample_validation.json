@@ -1,0 +1,24 @@
+{
+  "Momentum_140bpm_mix.wav": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "duration_seconds": 24.0,
+    "sample_peak": 0.5260815024375916,
+    "dc_offset": [
+      1.2938405532144277e-12,
+      5.63032928921656e-13
+    ],
+    "finite": true
+  },
+  "Momentum_master_48k.wav": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "duration_seconds": 24.0,
+    "sample_peak": 0.8419693712340526,
+    "dc_offset": [
+      -1.8396156745112984e-05,
+      -1.811491688522364e-05
+    ],
+    "finite": true
+  }
+}

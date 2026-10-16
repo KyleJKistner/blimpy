@@ -1,0 +1,6 @@
+firmware/bench_node/config.h
+.env
+__pycache__/
+*.pyc
+measurements/*.jpg
+measurements/*.wav

@@ -1,0 +1,7 @@
+added_air_g,intake_l,internal_air_volume_l,gauge_pressure_pa,reversible_pump_work_j,evidence
+0.1,0.08341212069902601,0.08335418112388708,70.4311094152401,0.0029367237386837626,Theoretical lower bound; full subsystem mass/power unverified
+0.3,0.25023636209707806,0.24971562934170094,211.2933282457203,0.026418279900858835,Theoretical lower bound; full subsystem mass/power unverified
+0.5,0.4170606034951301,0.4156161275536315,352.1555470762005,0.07335017533571954,Theoretical lower bound; full subsystem mass/power unverified
+1.0,0.8341212069902602,0.8283632457372542,704.311094152401,0.2930621680611055,Theoretical lower bound; full subsystem mass/power unverified
+2.0,1.6682424139805203,1.6453684684332988,1408.622188304802,1.169554393714947,Theoretical lower bound; full subsystem mass/power unverified
+3.0,2.5023636209707805,2.4512476791516296,2112.933282457203,2.6254767914939894,Theoretical lower bound; full subsystem mass/power unverified

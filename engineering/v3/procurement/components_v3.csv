@@ -1,0 +1,14 @@
+function,part,quantity,unit_mass_g,mass_basis,sourcing_status,verification_gap,source
+Camera/mic/Wi-Fi,Seeed XIAO ESP32S3 Sense,1,5.0,installed allowance,Retain for bench,Identify OV3660/OV5640; measure complete workload,https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/
+Flight controller/IMU,Seeed XIAO nRF52840 Sense Plus 102010694,1,3.0,installed allowance,Listed in stock at Seeed,Bottom-pad harness and board-core pin map require test,https://www.seeedstudio.com/Seeed-Studio-XIAO-nRF52840-Sense-Plus-p-6360.html
+Battery,Adafruit 2011 / DigiKey 1528-1857-ND,1,34.0,manufacturer nominal,Listed in stock at DigiKey; Adafruit out of stock,Exact datasheet; protected cell; polarity and capacity verification,https://www.digikey.com/en/products/detail/adafruit-industries-llc/2011/6612469
+Motor/gearbox candidate,MicronWings Gearbox 6mm Ball Raced,4,2.33,supplier nominal,Listed in stock; A/B samples only,0.97 mm shaft; no connector; matching prop/hub unresolved,https://micronwings.com/product/gearbox-6mm-ball-raced/
+Motor drivers,Pololu 2130 DRV8833,2,1.0,manufacturer bare-board nominal,Selected reference; verify stock,Modify sense links; 1 ohm current sense; default-off enable,https://www.pololu.com/product/2130
+Speaker amplifier,Adafruit 3006 MAX98357A,1,1.2,manufacturer bare-board nominal,Retain reference,Battery-direct rail; gain/clip/power test,https://www.adafruit.com/product/3006
+Speaker,PUI AS01808AO-SC18-WP-R,1,1.8,manufacturer nominal,Listed in stock at DigiKey,1 cc back chamber plus contacts counted in frame/wiring,https://www.digikey.com/en/products/detail/pui-audio-inc/AS01808AO-SC18-WP-R/9687113
+Downward range,Pololu 3415 VL53L1X,1,0.5,manufacturer bare-board nominal,Retain reference,Does not provide x/y localization or all-around obstacle sensing,https://www.pololu.com/product/3415
+Props/guards/hubs/mounts,Four approximately 102 mm prop stations,1,9.0,aggressive fabrication allowance,NOT procurement closed,Match hubs; weigh fully guarded assembly; signed thrust map,engineering allocation
+Frame/audio chamber,Balsa/foam frame and 1 cc speaker chamber,1,3.0,fabrication allowance,NOT fabricated,Keep antenna external; establish CG and restoring stability,engineering allocation
+Wiring/dock contacts/interlock,Lightweight wire and isolated charge contacts,1,5.0,fabrication allowance,NOT designed to production level,USB/charger paths mutually isolated; no unattended charging,engineering allocation
+Sense/switch/filtering,Four 1 ohm 1% 1206 sense resistors and filters,1,2.0,fabrication allowance,Bench design,Validate current transients; disable motor power on stale commands,engineering allocation
+Integration reserve,Unspent allowance,1,4.0,"reserve, not a physical component",Reserve,Not simultaneously available as cargo,engineering allocation

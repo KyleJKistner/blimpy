@@ -1,0 +1,41 @@
+test_diameter_cubic_lift_quadratic_skin (test_engineering.EnvelopeTests.test_diameter_cubic_lift_quadratic_skin) ... ok
+test_mass_layer_sum (test_engineering.EnvelopeTests.test_mass_layer_sum) ... ok
+test_more_gores_cost_mass (test_engineering.EnvelopeTests.test_more_gores_cost_mass) ... ok
+test_reference_volume (test_engineering.EnvelopeTests.test_reference_volume) ... ok
+test_reject_bad_geometry (test_engineering.EnvelopeTests.test_reject_bad_geometry) ... ok
+test_thicker_sealant_fails_limit (test_engineering.EnvelopeTests.test_thicker_sealant_fails_limit) ... ok
+test_two_seam_margins (test_engineering.EnvelopeTests.test_two_seam_margins) ... ok
+test_unsealed_base_is_not_complete_envelope (test_engineering.EnvelopeTests.test_unsealed_base_is_not_complete_envelope) ... ok
+test_bad_rail_detected (test_engineering.InterfaceTests.test_bad_rail_detected) ... ok
+test_declared_gpio_nonoverlap (test_engineering.InterfaceTests.test_declared_gpio_nonoverlap) ... ok
+test_declared_rail_compatibility (test_engineering.InterfaceTests.test_declared_rail_compatibility) ... ok
+test_double_charger_flagged (test_engineering.InterfaceTests.test_double_charger_flagged) ... ok
+test_factory_driver_configuration_flagged (test_engineering.InterfaceTests.test_factory_driver_configuration_flagged) ... ok
+test_sd_card_conflict_detected (test_engineering.InterfaceTests.test_sd_card_conflict_detected) ... ok
+test_gas_mass_is_not_double_counted (test_engineering.LiftTests.test_gas_mass_is_not_double_counted) ... ok
+test_hot_low_pressure_receiving_limits_need_aggregate_cap (test_engineering.LiftTests.test_hot_low_pressure_receiving_limits_need_aggregate_cap) ... ok
+test_moist_air_reduces_fill_capacity (test_engineering.LiftTests.test_moist_air_reduces_fill_capacity) ... ok
+test_no_helium_no_lift (test_engineering.LiftTests.test_no_helium_no_lift) ... ok
+test_nominal_mass_closes (test_engineering.LiftTests.test_nominal_mass_closes) ... ok
+test_party_mix_fails_large_battery_build (test_engineering.LiftTests.test_party_mix_fails_large_battery_build) ... ok
+test_purity_linear (test_engineering.LiftTests.test_purity_linear) ... ok
+test_slight_dimension_change_can_fail (test_engineering.LiftTests.test_slight_dimension_change_can_fail) ... ok
+test_added_mass_includes_displaced_air (test_engineering.PerformanceTests.test_added_mass_includes_displaced_air) ... ok
+test_battery_energy_once (test_engineering.PerformanceTests.test_battery_energy_once) ... ok
+test_braking_matches_closed_form (test_engineering.PerformanceTests.test_braking_matches_closed_form) ... ok
+test_current_tolerance_not_just_typical (test_engineering.PerformanceTests.test_current_tolerance_not_just_typical) ... ok
+test_dangerous_small_sense_resistor_rejected_by_budget (test_engineering.PerformanceTests.test_dangerous_small_sense_resistor_rejected_by_budget) ... ok
+test_drag_power_cubic (test_engineering.PerformanceTests.test_drag_power_cubic) ... ok
+test_drag_quadratic (test_engineering.PerformanceTests.test_drag_quadratic) ... ok
+test_faster_motion_brakes_farther (test_engineering.PerformanceTests.test_faster_motion_brakes_farther) ... ok
+test_four_motor_data_conversion (test_engineering.PerformanceTests.test_four_motor_data_conversion) ... ok
+test_guard_derating_costs_power (test_engineering.PerformanceTests.test_guard_derating_costs_power) ... ok
+test_larger_pack_arithmetic_margin (test_engineering.PerformanceTests.test_larger_pack_arithmetic_margin) ... ok
+test_no_unbounded_extrapolation (test_engineering.PerformanceTests.test_no_unbounded_extrapolation) ... ok
+test_reserve_not_usable_twice (test_engineering.PerformanceTests.test_reserve_not_usable_twice) ... ok
+test_zero_propulsion (test_engineering.PerformanceTests.test_zero_propulsion) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 0.023s
+
+OK

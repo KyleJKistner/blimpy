@@ -1,0 +1,32 @@
+test_camera (test_hub.HubTests.test_camera) ... ok
+test_device_config (test_hub.HubTests.test_device_config) ... ok
+test_extract_text (test_hub.HubTests.test_extract_text) ... ok
+test_media_auth (test_hub.HubTests.test_media_auth) ... ok
+test_mocked_cloud_question (test_hub.HubTests.test_mocked_cloud_question) ... ok
+test_mocked_voice_roundtrip (test_hub.HubTests.test_mocked_voice_roundtrip) ... ok
+test_no_cloud_without_consent (test_hub.HubTests.test_no_cloud_without_consent) ... ok
+test_no_motor_endpoint (test_hub.HubTests.test_no_motor_endpoint) ... ok
+test_public_page (test_hub.HubTests.test_public_page) ... ok
+test_record (test_hub.HubTests.test_record) ... ok
+test_status (test_hub.HubTests.test_status) ... ok
+test_air_filled (test_model.ModelTests.test_air_filled) ... ok
+test_bad_inputs (test_model.ModelTests.test_bad_inputs) ... ok
+test_bad_power (test_model.ModelTests.test_bad_power) ... ok
+test_energy (test_model.ModelTests.test_energy) ... ok
+test_fleet (test_model.ModelTests.test_fleet) ... ok
+test_half_diameter_eighth_lift (test_model.ModelTests.test_half_diameter_eighth_lift) ... ok
+test_heat_decay (test_model.ModelTests.test_heat_decay) ... ok
+test_heat_initial (test_model.ModelTests.test_heat_initial) ... ok
+test_lift (test_model.ModelTests.test_lift) ... ok
+test_no_preheat (test_model.ModelTests.test_no_preheat) ... ok
+test_parallel_chargers (test_model.ModelTests.test_parallel_chargers) ... ok
+test_purity (test_model.ModelTests.test_purity) ... ok
+test_runtime (test_model.ModelTests.test_runtime) ... ok
+test_sphere_volume (test_model.ModelTests.test_sphere_volume) ... ok
+test_thermal_mixture_guard (test_model.ModelTests.test_thermal_mixture_guard) ... ok
+test_two_active_fleet (test_model.ModelTests.test_two_active_fleet) ... ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.521s
+
+OK

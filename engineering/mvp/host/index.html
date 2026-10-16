@@ -1,0 +1,49 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Helium companion · bench console</title>
+<style>
+body{font:16px system-ui;margin:0;background:#f3f6f8;color:#172d3b}
+main{max-width:800px;margin:auto;padding:24px}h1{font-size:28px}
+section{background:white;border:1px solid #dbe4eb;border-radius:12px;padding:20px;margin:16px 0}
+input[type=text],input[type=password],textarea{box-sizing:border-box;width:100%;font:inherit;padding:12px;margin:8px 0;border:1px solid #ccd7dd;border-radius:6px}
+button{background:#175b6b;color:white;border:0;padding:12px;border-radius:6px;margin:5px 4px 5px 0;font:inherit}
+button:disabled{opacity:.5}img{display:block;max-width:100%;max-height:460px;margin:12px 0}
+small{color:#506675}label{display:block;margin:9px 0}pre{white-space:pre-wrap}
+</style><main>
+<h1>Helium companion</h1><p>Bench console · no flight controls</p>
+<section><label>Private hub token<input id="token" type="password" autocomplete="off"></label>
+<small>Token stays in this page's memory. Use a trusted private Wi-Fi network only.</small>
+<p><button id="status">Check node</button><button id="capture">Take photo</button><button id="record">Record 4 seconds</button></p>
+<pre id="result"></pre><img id="image" hidden alt="Latest explicit snapshot"><audio id="audio" controls hidden></audio>
+</section>
+<section><h2>Optional cloud conversation</h2>
+<p>Type a question or press Speak for a four-second microphone sample. Selected audio/image is sent to the cloud only after your explicit request.</p>
+<textarea id="question" rows="3" placeholder="What object is visible on the desk?"></textarea>
+<label><input id="camera" type="checkbox" checked> Include a fresh camera image</label>
+<label><input id="speak" type="checkbox" checked> Speak the answer on the robot (AI-generated voice; up to 12 seconds)</label>
+<label><input id="consent" type="checkbox"> I consent to sending the requested question/audio and selected image to the configured cloud API.</label>
+<button id="ask">Ask typed question</button><button id="talk">Speak for 4 seconds</button><p id="answer"></p>
+<small>The model must be configured on the hub. Cloud API charges may apply. This console does not autonomously watch, listen, search, or move.</small>
+</section></main>
+<script>
+const $=id=>document.getElementById(id);let busy=false,lastImage,lastAudio;
+async function request(path,opts={}) {
+ const r=await fetch(path,{...opts,headers:{"X-Hub-Token":$("token").value,...opts.headers}});
+ if(!r.ok){let t=await r.text();throw Error(t.slice(0,500));}return r;
+}
+async function run(fn){if(busy)return;busy=true;document.querySelectorAll("button").forEach(b=>b.disabled=true);
+ try{$("result").textContent="Working…";await fn();}
+ catch(e){$("result").textContent=e.message}
+ finally{busy=false;document.querySelectorAll("button").forEach(b=>b.disabled=false)}}
+$("status").onclick=()=>run(async()=>{$("result").textContent=JSON.stringify(await(await request("/api/status")).json(),null,2)});
+$("capture").onclick=()=>run(async()=>{const blob=await(await request("/api/capture")).blob();
+ if(lastImage)URL.revokeObjectURL(lastImage);lastImage=URL.createObjectURL(blob);$("image").src=lastImage;$("image").hidden=false;$("result").textContent="New snapshot received."});
+$("record").onclick=()=>run(async()=>{const blob=await(await request("/api/record",{method:"POST"})).blob();
+ if(lastAudio)URL.revokeObjectURL(lastAudio);lastAudio=URL.createObjectURL(blob);$("audio").src=lastAudio;$("audio").hidden=false;$("result").textContent="Four-second microphone sample received."});
+async function ask(talk){return run(async()=>{
+ if(!$("consent").checked)throw Error("Cloud consent must be selected.");
+ const r=await(await request(talk?"/api/talk":"/api/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+ text:$("question").value,use_camera:$("camera").checked,speak:$("speak").checked,cloud_consent:true})})).json();
+ $("answer").textContent=r.answer;$("result").textContent=r.audio_may_be_clipped?"Answer received; speaker audio may be clipped at 12 seconds.":"Answer received.";
+});}
+$("ask").onclick=()=>ask(false);$("talk").onclick=()=>ask(true);
+</script></html>

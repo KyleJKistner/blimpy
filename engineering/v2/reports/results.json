@@ -1,0 +1,157 @@
+{
+  "status": "Numerical models and specification audit only; no physical tests",
+  "envelope": {
+    "sphere_volume_l": 124.78824899079137,
+    "sphere_area_m2": 1.2076282160399165,
+    "seam_length_m": 11.68672467135403,
+    "seam_allowance_area_m2": 0.1168672467135403,
+    "cut_area_m2": 1.3244954627534569,
+    "laminate_basis_g_m2": 23.3,
+    "base_film_g": 18.463466750783187,
+    "sealant_g": 9.748286605865443,
+    "adhesive_g": 2.6489909255069137,
+    "valve_g": 1.0,
+    "reinforcement_g": 1.5,
+    "envelope_g": 33.36074428215555
+  },
+  "hardware_nominal_g": 76.3,
+  "hardware_acceptance_sum_g": 81.2,
+  "dry_nominal_g": 109.66074428215555,
+  "filled_lift_120L_g": 123.2757727555558,
+  "margin_at_120L_g": 13.615028473400258,
+  "corners_count": 128,
+  "corners_worst": {
+    "volume_l": 120.0,
+    "envelope_g": 36.0,
+    "hardware_g": 81.2,
+    "temperature_c": 27.0,
+    "pressure_pa": 100000.0,
+    "rh": 0.7,
+    "purity": 0.99,
+    "gas_lift_g": 117.52981283483659,
+    "untrimmed_margin_g": 0.32981283483658785
+  },
+  "corners_best": {
+    "volume_l": 124.79,
+    "envelope_g": 30.0,
+    "hardware_g": 76.3,
+    "temperature_c": 18.0,
+    "pressure_pa": 102000.0,
+    "rh": 0.3,
+    "purity": 0.999,
+    "gas_lift_g": 130.77386357265937,
+    "untrimmed_margin_g": 24.47386357265937
+  },
+  "current": {
+    "resistor_ohm": 0.82,
+    "trip_nominal_a": 0.24390243902439027,
+    "trip_min_a": 0.19319005071238832,
+    "trip_max_a": 0.29563932002956395,
+    "three_motor_trip_sum_a": 0.8869179600886918,
+    "allocated_media_a": 0.7,
+    "allocated_other_a": 0.12,
+    "static_current_envelope_a": 1.706917960088692,
+    "caveat": "25 C datasheet trip limits; not a bound on startup/blanking transients. Media cap unverified."
+  },
+  "missions": [
+    {
+      "speed_m_s": 0.15,
+      "moving_fraction": 0.1,
+      "trim_g": 1.5,
+      "horizontal_thrust_per_motor_g": 0.12456533460863808,
+      "vertical_power_proxy_w": 0.5057733333333333,
+      "moving_horizontal_power_proxy_w": 0.10741684021084891,
+      "total_power_proxy_w": 1.3665150173544185,
+      "runtime_2000mah_h": 4.061426277440284,
+      "status": "PROXY ONLY; measured current-limited thrust and onboard workload required"
+    },
+    {
+      "speed_m_s": 0.3,
+      "moving_fraction": 0.3,
+      "trim_g": 1.5,
+      "horizontal_thrust_per_motor_g": 0.49826133843455234,
+      "vertical_power_proxy_w": 0.5057733333333333,
+      "moving_horizontal_power_proxy_w": 0.38205159606269734,
+      "total_power_proxy_w": 1.7703888121521423,
+      "runtime_2000mah_h": 3.134904582487301,
+      "status": "PROXY ONLY; measured current-limited thrust and onboard workload required"
+    },
+    {
+      "speed_m_s": 0.6,
+      "moving_fraction": 0.75,
+      "trim_g": 1.5,
+      "horizontal_thrust_per_motor_g": 1.9930453537382093,
+      "vertical_power_proxy_w": 0.5057733333333333,
+      "moving_horizontal_power_proxy_w": 1.3256932529418206,
+      "total_power_proxy_w": 3.1000432730396983,
+      "runtime_2000mah_h": 1.7902975898004276,
+      "status": "PROXY ONLY; measured current-limited thrust and onboard workload required"
+    }
+  ],
+  "braking": [
+    {
+      "speed_m_s": 0.15,
+      "stop_distance_m": 0.1054527223370954,
+      "stop_time_s": 1.1142621759081974,
+      "analytic_distance_m": 0.10545572509002638,
+      "effective_mass_kg": 0.2172959760422466,
+      "reverse_thrust_assumed_g": 4.0,
+      "latency_s": 0.3
+    },
+    {
+      "speed_m_s": 0.3,
+      "stop_distance_m": 0.3125574344089357,
+      "stop_time_s": 1.8412838656359496,
+      "analytic_distance_m": 0.31257918021929987,
+      "effective_mass_kg": 0.2172959760422466,
+      "reverse_thrust_assumed_g": 4.0,
+      "latency_s": 0.3
+    },
+    {
+      "speed_m_s": 0.5,
+      "stop_distance_m": 0.6761563403976643,
+      "stop_time_s": 2.6100147375622442,
+      "analytic_distance_m": 0.6762392905395915,
+      "effective_mass_kg": 0.2172959760422466,
+      "reverse_thrust_assumed_g": 4.0,
+      "latency_s": 0.3
+    },
+    {
+      "speed_m_s": 0.6,
+      "stop_distance_m": 0.8716867472933343,
+      "stop_time_s": 2.911735857187382,
+      "analytic_distance_m": 0.8718152195244766,
+      "effective_mass_kg": 0.2172959760422466,
+      "reverse_thrust_assumed_g": 4.0,
+      "latency_s": 0.3
+    },
+    {
+      "speed_m_s": 1.0,
+      "stop_distance_m": 1.626977839985538,
+      "stop_time_s": 3.727414074704082,
+      "analytic_distance_m": 1.6273590416083354,
+      "effective_mass_kg": 0.2172959760422466,
+      "reverse_thrust_assumed_g": 4.0,
+      "latency_s": 0.3
+    }
+  ],
+  "energy": {
+    "nominal_wh": 7.4,
+    "usable_fraction": 0.75,
+    "usable_wh": 5.55,
+    "runtime_by_load": {
+      "1.2": 4.625000000000001,
+      "1.5": 3.7000000000000006,
+      "1.8": 3.0833333333333335,
+      "2.0": 2.7750000000000004,
+      "2.8": 1.9821428571428574,
+      "3.0": 1.8500000000000003
+    }
+  },
+  "fleet": {
+    "charge_current_a": 0.5,
+    "assumed_charge_turnaround_h": 4.0,
+    "active_runtime_at_1p8W_h": 3.0833333333333335,
+    "one_active_units": 3
+  }
+}

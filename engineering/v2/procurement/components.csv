@@ -1,0 +1,17 @@
+component,selection,installed_quantity,nominal_line_mass_g,decision,evidence,open_issue,source
+XIAO ESP32S3 Sense + antenna,113991115,1,5,KEEP; log camera revision,installed allocation; camera revision unresolved,Media power open; board may arrive OV3660 or OV5640,https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/
+XIAO nRF52840 Sense with IMU,102010469,1,3,REPLACE RP2040 + discrete IMU,installed allocation,Installed mass and firmware unverified,https://wiki.seeedstudio.com/XIAO_BLE/
+Adafruit 2011 protected 2000mAh pack,Adafruit 2011,1,34,REPLACE 1200mAh battery,manufacturer nominal; receiving limit allocated,2A continuous linked pack rating; verify actual delivered pack,https://www.adafruit.com/product/2011
+Bitcraze 7x16mm motors,Bitcraze 7mm 7x16 motor,3,8.1,BENCH CANDIDATE,manufacturer nominal includes connector,Guarded current-limited forward/reverse thrust open,https://www.bitcraze.io/documentation/hardware/motor_7mm/motor_7mm-datasheet.pdf
+Pololu 2130 DRV8833 carriers,Pololu 2130,2,2,KEEP; MODIFY,manufacturer bare boards; no headers,Fit current sense resistors; remove default sleep pull-up; check stock,https://www.pololu.com/product/2130/specs
+Adafruit 3006 MAX98357A amplifier,Adafruit 3006,1,1.2,KEEP,manufacturer bare board,Direct battery supply; test actual voice loudness/power,https://www.adafruit.com/product/3006
+Adafruit 3923 8ohm 1W speaker,Adafruit 3923,1,3,SOURCING BLOCKED,manufacturer nominal; out of stock,Out of stock at manufacturer; DigiKey available to order but not stocked; no substitute approved,https://www.adafruit.com/product/3923
+Pololu 3415 VL53L1X carrier,Pololu 3415,1,0.5,KEEP,manufacturer bare board; no headers,Altitude only; not room-wide obstacle sensing,https://www.pololu.com/product/3415/specs
+47-17 props + mounts + full guards,Bitcraze 47-17 + guards,1,5.5,FABRICATE / WEIGH,"installed allocation, NOT a safety certification",5.5g combined target; protective function unvalidated,https://store.bitcraze.io/collections/spare-parts/products/propeller-47-17-black
+Balsa/foam frame and speaker baffle,Custom,1,3,FABRICATE / WEIGH,fabrication allowance,No heavy printed shell; include baffle,engineering allocation
+Wiring + contacts + power-off interlock,Custom,1,5,FABRICATE / WEIGH,fabrication allowance; no airborne charger/boost,Initial manual load-disconnect charging; automatic dock not designed,engineering allocation
+"Current sense, switch, filtering, insulation",0.82ohm 1206 1% >=0.25W + other passives,1,2,FABRICATE / WEIGH,fabrication allowance; current monitoring on test bench,Exact installed assembly must be measured,engineering allocation
+Unallocated integration reserve,Not a physical part,1,4,RESERVE,"budget only, not physically installed mass",Do not spend all per-item tolerances independently,engineering reserve
+Finished helium envelope,Custom to RFQ,1,33.361,QUOTE / SAMPLE REQUIRED,Calculated proposed stack; not supplier-guaranteed,"<=36g,>=120L,retention gate",https://www.advansix.com/wp-content/uploads/2023/02/Capran-PIR-MT1200-TDS.pdf
+Dock-only charger,Adafruit 6091 bq25185,0,0,MOVE OFF AIRCRAFT,No airborne mass charged,500mA + temperature sensor + physical load isolation,https://www.adafruit.com/product/6091
+5V boost converter,Adafruit 4654,0,0,REMOVE,Use direct1S BAT supply architecture,Verify low-battery regulator behavior,https://www.adafruit.com/product/4654

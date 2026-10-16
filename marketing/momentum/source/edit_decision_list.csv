@@ -1,0 +1,17 @@
+shot,name,start_seconds,end_seconds,first_frame_30fps,duration_seconds,source,motion_note,rendered_start_seconds
+1,Lens ignition,0.0,0.42857142857142855,0,0.42857142857142855,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",0.0
+2,Rotor cut-in,0.42857142857142855,0.8571428571428571,13,0.42857142857142855,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",0.43333333333333335
+3,Foil sweep,0.8571428571428571,1.7142857142857142,26,0.8571428571428571,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",0.8666666666666667
+4,Off-screen hero,1.7142857142857142,3.4285714285714284,52,1.7142857142857142,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",1.7333333333333334
+5,Low-angle flyby,3.4285714285714284,5.142857142857143,103,1.7142857142857142,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",3.433333333333333
+6,Camera whip,5.142857142857143,6.0,155,0.8571428571428571,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",5.166666666666667
+7,Conversation orbit,6.0,7.714285714285714,180,1.7142857142857142,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",6.0
+8,Search dive,7.714285714285714,9.428571428571429,232,1.7142857142857142,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",7.733333333333333
+9,Keys lock-on,9.428571428571429,10.714285714285714,283,1.2857142857142858,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",9.433333333333334
+10,Phone match,10.714285714285714,12.0,322,1.2857142857142858,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",10.733333333333333
+11,Dock rail slider,12.0,13.714285714285714,360,1.7142857142857142,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",12.0
+12,Contact detail,13.714285714285714,14.571428571428571,412,0.8571428571428571,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",13.733333333333333
+13,Departure rise,14.571428571428571,16.285714285714285,438,1.7142857142857142,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",14.6
+14,Fleet handoff,16.285714285714285,18.0,489,1.7142857142857142,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",16.3
+15,Presence orbit,18.0,20.571428571428573,540,2.5714285714285716,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",18.0
+16,Brand resolve,20.571428571428573,24.0,618,3.4285714285714284,new procedural 3D render,"Fast camera and edit; product motion is illustrative, not performance evidence.",20.6

@@ -1,0 +1,14 @@
+component,qty,unit_mass_g,line_mass_g,acceptance_line_g,basis,source
+XIAO ESP32S3 Sense + antenna,1,5.0,5.0,5.5,installed allocation; camera revision unresolved,https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/
+XIAO nRF52840 Sense with IMU,1,3.0,3.0,3.5,installed allocation,https://wiki.seeedstudio.com/XIAO_BLE/
+Adafruit 2011 protected 2000mAh pack,1,34.0,34.0,35.0,manufacturer nominal; receiving limit allocated,https://www.adafruit.com/product/2011
+Bitcraze 7x16mm motors,3,2.7,8.100000000000001,8.4,manufacturer nominal includes connector,https://www.bitcraze.io/documentation/hardware/motor_7mm/motor_7mm-datasheet.pdf
+Pololu 2130 DRV8833 carriers,2,1.0,2.0,2.2,manufacturer bare boards; no headers,https://www.pololu.com/product/2130/specs
+Adafruit 3006 MAX98357A amplifier,1,1.2,1.2,1.3,manufacturer bare board,https://www.adafruit.com/product/3006
+Adafruit 3923 8ohm 1W speaker,1,3.0,3.0,3.2,manufacturer nominal; out of stock,https://www.adafruit.com/product/3923
+Pololu 3415 VL53L1X carrier,1,0.5,0.5,0.6,manufacturer bare board; no headers,https://www.pololu.com/product/3415/specs
+47-17 props + mounts + full guards,1,5.5,5.5,6.0,"installed allocation, NOT a safety certification",https://store.bitcraze.io/collections/spare-parts/products/propeller-47-17-black
+Balsa/foam frame and speaker baffle,1,3.0,3.0,3.5,fabrication allowance,engineering allocation
+Wiring + contacts + power-off interlock,1,5.0,5.0,5.5,fabrication allowance; no airborne charger/boost,engineering allocation
+"Current sense, switch, filtering, insulation",1,2.0,2.0,2.5,fabrication allowance; current monitoring on test bench,engineering allocation
+Unallocated integration reserve,1,4.0,4.0,4.0,"budget only, not physically installed mass",engineering reserve

@@ -1,0 +1,16 @@
+stage,item,part_id,buy_quantity,unit_price_usd,price_status,availability,source_url,notes
+A,Seeed XIAO ESP32S3 Sense,113991115,2,13.9,Verified manufacturer listing,In stock at check,https://www.seeedstudio.com/XIAO-ESP32S3-Sense-p-5639.html,One working node + one spare; camera and mic included
+A,Adafruit MAX98357A mono I2S amplifier,3006,1,5.95,Verified manufacturer listing,Recheck checkout,https://www.adafruit.com/product/3006,Limit speaker amplitude; 1W speaker
+A,Adafruit Mini Oval Speaker 8 ohm 1W,3923,1,1.95,Verified manufacturer listing,Only 1 in stock at check,https://www.adafruit.com/product/3923,3g; no substitute heavier speaker without mass update
+A,Adafruit 3.7V 1200mAh protected LiPo,258,2,9.95,Verified manufacturer listing,Recheck checkout,https://www.adafruit.com/product/258,One flight pack + spare; charge <=500mA; 1.2A continuous pack rating
+A,Adafruit bq25185 charger,6091,1,6.95,Verified manufacturer listing,In stock at check,https://www.adafruit.com/product/6091,DEFAULT 1A: set 500mA before connecting battery; add thermistor
+A,Adafruit MiniBoost TPS61023,4654,1,3.95,Verified manufacturer listing,In stock at check,https://www.adafruit.com/product/4654,Nominal 5V module actually targets 5.2V; verify loaded rail
+B,Seeed XIAO RP2040,102010428,1,3.99,Verified manufacturer listing,In stock at check,https://www.seeedstudio.com/XIAO-RP2040-v1-0-p-5026.html,Flight/safety software not implemented
+B,Bitcraze 7mm DC motor pack,4-motor pack,1,12.0,Verified manufacturer listing,Recheck checkout,https://store.bitcraze.io/collections/spare-parts/products/4-x-7-mm-dc-motor-pack-for-crazyflie-2,Three installed + one spare; NOT all at full current
+B,Bitcraze propeller 47-17 black,8-prop pack,1,6.0,Verified manufacturer listing,Recheck checkout,https://store.bitcraze.io/collections/spare-parts/products/propeller-47-17-black,Match 0.8mm motor shaft; prop guards additional
+B,Bitcraze 7mm motor mounts,4-mount pack,1,6.5,Verified manufacturer listing,Recheck checkout,https://store.bitcraze.io/collections/spare-parts/products/crazyflie-2-0-4-x-spare-7-mm-motor-mounts,Add lightweight guards; mount pack is not a complete cage
+B,Pololu DRV8833 motor carrier,2130,2,10.0,PRICE ALLOWANCE; not verified,Price and stock unresolved,https://www.pololu.com/product/2130,Actual current limiting and driver sleep pull-down required
+B,Pololu VL53L1X distance sensor,3415,1,25.0,PRICE ALLOWANCE; not verified,Price and stock unresolved,https://www.pololu.com/product/3415,"Altitude/range sensing, NOT complete localization"
+B,Pololu LSM6DSO IMU,2798,1,19.95,Verified manufacturer listing,Recheck checkout,https://www.pololu.com/product/2798,0.6g bare board; 2g installed allocation
+Q,Lightweight envelope samples,Actual cold volume >=113L,3,,SUPPLIER QUOTE / SAMPLE REQUIRED,Not a verified flight-ready envelope,https://laballoons.com/products/24-inch-la-balloons-mirror-sphere-red-foil-balloon-r2512,Example sample only; advertised 24-inch may not equal inflated 60cm sphere
+Q,High-purity helium and regulator,Supplier-stated >=99% He,1,,QUOTE REQUIRED,Purity and stock unverified,https://www.balloonitsd.com/helium.html,"Ask for gas volume, rental, regulator, deposit; reject 80% party mix for baseline"

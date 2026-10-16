@@ -1,0 +1,27 @@
+{
+  "diameter_m": 0.6,
+  "temperature_c": 20.0,
+  "pressure_pa": 101325.0,
+  "helium_purity": 1.0,
+  "air_gas_constant": 287.05,
+  "helium_gas_constant": 2077.1,
+  "dry_mass_g": 105.3,
+  "envelope_mass_g": 32.0,
+  "battery_ah": 1.2,
+  "battery_v": 3.7,
+  "usable_fraction": 0.8,
+  "charge_current_a": 0.5,
+  "charge_turnaround_h": 2.75,
+  "active_units": 1,
+  "cold_negative_trim_g": 1.5,
+  "preheat_delta_k": 20.0,
+  "helium_cp_j_kg_k": 5193.0,
+  "envelope_cp_j_kg_k": 1200.0,
+  "overall_heat_transfer_w_m2_k": 2.0,
+  "dock_gap_m": 0.1,
+  "scenarios_w": {
+    "Quiet intermittent sensing": 0.9,
+    "Normal slow roaming": 1.5,
+    "Heavy motion and media": 3.0
+  }
+}

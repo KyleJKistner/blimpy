@@ -1,0 +1,70 @@
+{
+  "model_status": "Unvalidated engineering estimates; see assumptions and test gates",
+  "volume_l": 113.09733552923252,
+  "area_m2": 1.1309733552923256,
+  "gas_mass_g": 18.820089379262267,
+  "supported_dry_mass_g": 117.36248386465219,
+  "dry_mass_g": 105.3,
+  "untrimmed_margin_g": 12.062483864652194,
+  "ballast_to_cold_trim_g": 13.562483864652194,
+  "nominal_wh": 4.44,
+  "usable_wh": 3.5520000000000005,
+  "fleet": {
+    "Quiet intermittent sensing": {
+      "runtime_h": 3.946666666666667,
+      "minimum_robots": 2,
+      "minimum_simultaneous_chargers": 1,
+      "strip_width_m": 1.3
+    },
+    "Normal slow roaming": {
+      "runtime_h": 2.3680000000000003,
+      "minimum_robots": 3,
+      "minimum_simultaneous_chargers": 2,
+      "strip_width_m": 1.9999999999999998
+    },
+    "Heavy motion and media": {
+      "runtime_h": 1.1840000000000002,
+      "minimum_robots": 4,
+      "minimum_simultaneous_chargers": 3,
+      "strip_width_m": 2.7
+    }
+  },
+  "thermal": [
+    {
+      "time_s": 0,
+      "tau_s": 60.18387767911754,
+      "delta_k": 20.0,
+      "extra_lift_g": 9.290982312393961,
+      "warm_volume_l": 120.81333999992894,
+      "stored_heat_wh": 0.7562929119250497,
+      "initial_hold_power_w": 45.23893421169302
+    },
+    {
+      "time_s": 60,
+      "tau_s": 60.18387767911754,
+      "delta_k": 7.380102580329851,
+      "extra_lift_g": 3.428420126874884,
+      "warm_volume_l": 115.94458075443369,
+      "stored_heat_wh": 0.7562929119250497,
+      "initial_hold_power_w": 45.23893421169302
+    },
+    {
+      "time_s": 180,
+      "tau_s": 60.18387767911754,
+      "delta_k": 1.0049100829033133,
+      "extra_lift_g": 0.4668300902900516,
+      "warm_volume_l": 113.48503006384902,
+      "stored_heat_wh": 0.7562929119250497,
+      "initial_hold_power_w": 45.23893421169302
+    },
+    {
+      "time_s": 300,
+      "tau_s": 60.18387767911754,
+      "delta_k": 0.13683336562452086,
+      "extra_lift_g": 0.06356581898813796,
+      "warm_volume_l": 113.15012587227748,
+      "stored_heat_wh": 0.7562929119250497,
+      "initial_hold_power_w": 45.23893421169302
+    }
+  ]
+}

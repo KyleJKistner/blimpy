@@ -1,0 +1,24 @@
+{
+  "FLOAT_Presence_30s_1080p.mp4": {
+    "duration_s": 30,
+    "width": 1920,
+    "height": 1080,
+    "frames": 720,
+    "fps": 24,
+    "audio": "48kHz stereo AAC",
+    "size_bytes": 14548938,
+    "technical_checks": "passed",
+    "visual_status": "CGI concept, not prototype footage"
+  },
+  "FLOAT_Presence_15s_Square.mp4": {
+    "duration_s": 15,
+    "width": 1080,
+    "height": 1080,
+    "frames": 360,
+    "fps": 24,
+    "audio": "48kHz stereo AAC",
+    "size_bytes": 5156582,
+    "technical_checks": "passed",
+    "visual_status": "CGI concept, not prototype footage"
+  }
+}
