@@ -9,11 +9,11 @@ Production brief for an optional "with people" cut. The 30-second CG film is com
 | **Blender (CG)** | Anything where FLOAT itself is the subject: pod, lens and indicator, fans, envelope, dock, fleet, end card | Product truth. Fan count, pod geometry, seams and scale must not drift between shots. |
 | **Image-to-video model** | Human beats only: hands, a person in the room, reactions | CG people would look worse than no people. |
 
-Every insert starts from a **plate**: a frame of the CG film rendered with the same set, light, lens and product (`source/plates.py`, output in `plates/stills/`). The model animates a person *into* that frame. Where the model supports first- and last-frame conditioning, supply both plates.
+Every insert starts from a **plate**: a frame of the CG film rendered with the same set, light, lens and product (`source/plates.py`; committed as JPEGs in `plates/stills/`). The model animates a person *into* that frame. Where the model supports first- and last-frame conditioning, supply both plates.
 
 ## General settings
 
-- **Input:** plate PNG as the first frame. Use the matching `_end` plate as the last frame where provided and supported.
+- **Input:** plate image as the first frame. Use the matching `_end` plate as the last frame where provided and supported.
 - **Output:** 1080p, 16:9, 24 fps if offered (otherwise 24/25/30; the edit conforms to 24 fps). Generate the longest duration the model offers and trim; the action should finish within the first ~3 seconds.
 - **Camera:** locked off or a very slow push, matching the plate. No orbit, no zoom, no handheld shake.
 - **FLOAT:** must stay still or nearly still, with geometry unchanged. Do not describe FLOAT doing anything in the prompt beyond "remains hovering, unchanged".
@@ -26,21 +26,21 @@ Every insert starts from a **plate**: a frame of the CG film rendered with the s
 
 ### P1 · The ask (≈2 s, opens the film before S01)
 
-- Plate: `P1_ask_start.png`
+- Plate: `P1_ask_start.jpg`
 - Prompt: *Photorealistic interior, late-afternoon sun through tall black-framed windows. A person in a soft grey knit sweater walks into frame from the right foreground, seen from behind and slightly to the side, patting their jacket pockets and glancing around the living room as if looking for something. In the background, the mirrored silver sphere with a small dark camera pod beneath it remains hovering, unchanged, near the window. Static camera, natural motion, shallow depth of field, cinematic, 35mm film look.*
 - Keep: person never faces camera; sphere does not move or change; sunlight patches on the wall stay put.
 - Edit: cut to S01 (FLOAT turns) on the question "Float, have you seen my keys?".
 
 ### P2 · The pickup (≈2 s, after S07 "Found them")
 
-- Plates: `P2_pickup_start.png` (keys between cushions), `P2_pickup_end.png` (keys gone)
+- Plates: `P2_pickup_start.jpg` (keys between cushions), `P2_pickup_end.jpg` (keys gone)
 - Prompt: *Close-up at seat level on a beige bouclé sofa. A hand enters from the bottom of frame, fingers slide into the gap between the seat cushions and lift out a ring of brass keys with a tan leather tag. Above and behind, out of focus, the hovering silver device with a glowing amber ring remains still. Static camera, shallow depth of field, warm natural light, photorealistic.*
 - Keep: one hand with five fingers; keys stay brass with a tan tag; FLOAT unchanged.
 - Edit: replaces the last ~1.5 s of S07 or extends it. Add a key-jingle effect in `score.py`.
 
 ### P3 · Thanks (≈2.5 s, between S08 and S09)
 
-- Plate: `P3_thanks_start.png`
+- Plate: `P3_thanks_start.jpg`
 - Prompt: *Over-the-shoulder view from behind a person standing beside a sofa in a sunlit living room. The person steps into the left foreground holding up a ring of brass keys, gives a small relieved nod toward the hovering silver sphere at eye level in front of them. The sphere and its small dark pod with an amber ring remain hovering, unchanged. Static camera, shallow depth of field, photorealistic, warm late-afternoon light.*
 - Keep: only shoulder, hair and hand visible; no face; FLOAT unchanged.
 - Optional line (new voice take): "Thanks, Float." Generated with `voice.py` if added to `timeline.DIALOGUE`.
