@@ -1,7 +1,7 @@
 {
  "bpm": 120,
  "key": "D major",
- "duration_s": 30.0,
+ "duration_s": 40.0,
  "sample_rate": 48000,
  "seed": 20261017,
  "original_synthesis": true,
@@ -11,44 +11,52 @@
   "effects",
   "dialogue"
  ],
- "kicks": 34,
- "peak_before_gain": 1.366918220442668,
+ "kicks": 48,
+ "peak_before_gain": 1.4471058806256563,
  "sections": {
-  "intro": [
+  "keys": [
    0,
-   5
-  ],
-  "build": [
-   5,
    7
   ],
-  "drop": [
+  "build": [
    7,
-   11
+   8
   ],
-  "search": [
-   11,
-   13
+  "drop": [
+   8,
+   12
   ],
-  "found": [
-   13,
-   18
+  "app": [
+   12,
+   13.5
   ],
-  "shift_change": [
-   18,
-   22
+  "stove": [
+   13.5,
+   17
   ],
-  "lift": [
-   22,
+  "plant": [
+   17,
+   20
+  ],
+  "cooking": [
+   20,
    24
   ],
-  "thesis": [
+  "call": [
    24,
    27
   ],
-  "end": [
+  "night": [
    27,
-   30
+   33
+  ],
+  "thesis": [
+   33,
+   36
+  ],
+  "end": [
+   36,
+   40
   ]
  }
 }

@@ -1,13 +1,19 @@
-shot,name,first_frame,last_frame,start_s,end_s,beats,purpose
-S01,The ask,0,71,0.0,3.0,6.0,Hook: a mirrored sphere in a sunlit room turns toward a spoken question.
-S02,Listening,72,119,3.0,5.0,4.0,"Product face: lens and amber ring answer ""Let me look."""
-S03,Spin-up,120,143,5.0,6.0,2.0,Detail: guarded fan spins up on the beat.
-S04,Set off,144,167,6.0,7.0,2.0,Detail: low three-quarter as FLOAT sets off; the room curves across the envelope.
-S05,Meet FLOAT,168,263,7.0,11.0,8.0,"Drop: low tracking shot through the sun, title."
-S06,Point of view,264,311,11.0,13.0,4.0,Use case: FLOAT's simulated camera view finds the keys.
-S07,Found,312,383,13.0,16.0,6.0,Payoff: rack focus to the keys; spoken answer.
-S08,On your phone,384,431,16.0,18.0,4.0,Payoff: simulated phone notification.
-S09,Shift change,432,527,18.0,22.0,8.0,"Differentiator: one unit docks, another lifts off."
-S10,Lift,528,575,22.0,24.0,4.0,Energy: low angle as the fresh unit rises.
-S11,In the room,576,647,24.0,27.0,6.0,Thesis line over a backlit beauty shot.
-S12,End card,648,719,27.0,30.0,6.0,"Brand, call to action and concept disclosure."
+shot,name,first_frame,last_frame,start_s,end_s,beats,time_of_day,purpose
+S01,The ask,0,59,0.0,2.5,5.0,morning,Hook: a mirrored sphere in a sunlit room turns toward a spoken question.
+S02,Listening,60,83,2.5,3.5,2.0,morning,"Product face: lens and amber ring answer ""Let me look."""
+S03,Search view,84,119,3.5,5.0,3.0,morning,FLOAT's simulated camera view locks on the keys.
+S04,Found,120,167,5.0,7.0,4.0,morning,Rack focus from FLOAT to the keys; spoken answer.
+S05,Spin-up,168,179,7.0,7.5,1.0,morning,Detail: guarded fan spins up into the drop.
+S06,Set off,180,191,7.5,8.0,1.0,morning,Detail: low three-quarter; the room curves across the envelope.
+S07,Meet FLOAT,192,287,8.0,12.0,8.0,morning,"Drop: low tracking shot through the sun, title."
+S08,From anywhere,288,323,12.0,13.5,3.0,graphic,"Simulated app: ""Did I leave the stove on?"" asked from outside."
+S09,Into the kitchen,324,359,13.5,15.0,3.0,midday,FLOAT crosses the house to go and look.
+S10,Live view,360,407,15.0,17.0,4.0,midday,"Simulated live view: four knobs, all off."
+S11,Notices,408,479,17.0,20.0,6.0,golden,FLOAT notices the olive tree needs water.
+S12,Cooking,480,527,20.0,22.0,4.0,evening,"Hands-free in the kitchen: ""What's next?"""
+S13,Next step,528,575,22.0,24.0,4.0,evening,Pod close-up over the pan; timer.
+S14,The call,576,647,24.0,27.0,6.0,evening,Grandma's voice through FLOAT over a crayon drawing.
+S15,Shift change,648,743,27.0,31.0,8.0,night,The day unit docks; a charged one lifts off.
+S16,Lift,744,791,31.0,33.0,4.0,night,Low angle as the fresh unit rises.
+S17,In the room,792,863,33.0,36.0,6.0,night,Thesis line.
+S18,End card,864,959,36.0,40.0,8.0,night,"Brand, call to action and concept disclosure."

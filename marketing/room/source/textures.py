@@ -160,7 +160,93 @@ def scarf(n=1024, seed=81):
     save('knit_color', color)
 
 
+def zellige(n=1024, seed=91, tiles=8):
+    """Hand-made glazed tiles: per-tile tone and wobble, recessed grout."""
+    rng = np.random.default_rng(seed)
+    t = n // tiles
+    color = np.zeros((n, n, 3), np.float32)
+    height = np.zeros((n, n), np.float32)
+    yy, xx = np.mgrid[0:t, 0:t] / t
+    for i in range(tiles):
+        for j in range(tiles):
+            tone = np.array([.80, .84, .80]) * rng.uniform(.88, 1.04) + rng.uniform(-.02, .02, 3)
+            pool = gaussian_filter(rng.standard_normal((t, t)), t / 6)
+            pool /= max(np.abs(pool).max(), 1e-6)
+            edge = np.minimum(np.minimum(xx, 1 - xx), np.minimum(yy, 1 - yy))
+            glaze = 1 - .08 * pool - .10 * np.exp(-edge * 40)
+            color[i * t:(i + 1) * t, j * t:(j + 1) * t] = tone[None, None, :] * glaze[..., None]
+            h = .6 + .25 * pool + .15 * np.clip(edge * 12, 0, 1)
+            h[edge < .025] = 0
+            height[i * t:(i + 1) * t, j * t:(j + 1) * t] = h
+    color[height == 0] = (.62, .60, .55)
+    save('zellige_color', color)
+    save('zellige_bump', gaussian_filter(height, 1.2))
+
+
+def child_drawing(w=1188, h=840, seed=101):
+    """A crayon drawing on white paper: rocket, sun, stars, ground."""
+    from PIL import ImageDraw
+    rng = np.random.default_rng(seed)
+    img = Image.new('RGB', (w, h), (246, 244, 238))
+    d = ImageDraw.Draw(img)
+
+    def crayon(points, color, width=9, passes=3):
+        for _ in range(passes):
+            jit = [(x + rng.normal(0, 2.5), y + rng.normal(0, 2.5)) for x, y in points]
+            d.line(jit, fill=color, width=width, joint='curve')
+
+    def scribble_fill(box, color, step=13):
+        x0, y0, x1, y1 = box
+        y = y0
+        while y < y1:
+            crayon([(x0, y), (x1, y + rng.normal(0, 4))], color, 7, 1)
+            y += step
+    red, blue, yellow, green, orange = (214, 54, 46), (46, 92, 196), (246, 196, 40), (62, 150, 70), (238, 132, 40)
+    # Rocket body, nose, fins, window and flame.
+    scribble_fill((470, 260, 610, 560), (232, 232, 236))
+    crayon([(470, 560), (470, 260), (540, 140), (610, 260), (610, 560), (470, 560)], blue, 10)
+    scribble_fill((488, 170, 592, 255), red, 11)
+    crayon([(470, 470), (400, 600), (470, 560)], red, 10)
+    crayon([(610, 470), (680, 600), (610, 560)], red, 10)
+    for k in range(40):
+        a = k / 40 * 2 * np.pi
+        crayon([(540 + 36 * np.cos(a), 350 + 36 * np.sin(a)), (540 + 36 * np.cos(a + .2), 350 + 36 * np.sin(a + .2))], blue, 9, 1)
+    scribble_fill((512, 330, 568, 372), (120, 190, 240), 9)
+    for k in range(6):
+        crayon([(500 + k * 16, 570), (510 + k * 12, 660 + 40 * rng.random())], orange if k % 2 else yellow, 10, 2)
+    # Sun with rays.
+    for k in range(60):
+        a = k / 60 * 2 * np.pi
+        crayon([(170 + 70 * np.cos(a), 160 + 70 * np.sin(a)), (170 + 70 * np.cos(a + .12), 160 + 70 * np.sin(a + .12))], yellow, 12, 1)
+    scribble_fill((120, 110, 220, 210), yellow, 10)
+    for k in range(10):
+        a = k / 10 * 2 * np.pi
+        crayon([(170 + 90 * np.cos(a), 160 + 90 * np.sin(a)), (170 + 130 * np.cos(a), 160 + 130 * np.sin(a))], orange, 8, 2)
+    # Stars and ground.
+    for cx, cy in [(860, 140), (980, 260), (760, 300), (1060, 110)]:
+        for k in range(5):
+            a = k / 5 * 2 * np.pi - np.pi / 2
+            crayon([(cx, cy), (cx + 30 * np.cos(a), cy + 30 * np.sin(a))], yellow, 7, 2)
+    crayon([(30, 760), (300, 735), (600, 770), (900, 740), (1160, 765)], green, 16, 4)
+    paper = np.asarray(img).astype(np.float32) / 255
+    paper *= (1 + .02 * fbm((h, w), [1.2], [1], seed))[..., None]
+    save('drawing', paper)
+
+
+def recipe_page(w=800, h=1100, seed=111):
+    rng = np.random.default_rng(seed)
+    img = np.ones((h, w, 3), np.float32) * np.array([.95, .93, .88])
+    y = 110
+    img[y:y + 34, 70:520] = (.25, .22, .20)
+    y += 90
+    for k in range(22):
+        ln = int(rng.uniform(.45, .92) * (w - 140))
+        img[y:y + 9, 70:70 + ln] = (.45, .43, .40)
+        y += 34 if k % 6 != 5 else 58
+    save('recipe', img)
+
+
 if __name__ == '__main__':
-    for fn in [oak_floor, walnut, plaster, boucle, rug, artwork, outside, scarf]:
+    for fn in [oak_floor, walnut, plaster, boucle, rug, artwork, outside, scarf, zellige, child_drawing, recipe_page]:
         fn()
         print('texture', fn.__name__, flush=True)

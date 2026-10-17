@@ -326,30 +326,36 @@ MOTIF = [A + 0, D + 12, E + 12, Fs + 12]                  # "FLOAT": a rising fo
 
 
 def section_intro():
-    # 0-5 s: air, felt piano, sustained harmony. Space for the spoken question.
+    # 0-7 s: morning; air, felt piano, sustained harmony around the spoken lines.
     pad(0.0, 2.7, CH['Gmaj9'][1:], .045, 1300)
     pad(2.5, 2.6, CH['Dadd9/F#'][1:], .045, 1500)
-    bass(0.0, 2.4, CH['Gmaj9'][0] + 12, .07)
-    bass(2.5, 2.4, CH['Dadd9/F#'][0] + 12, .07)
-    # Piano answers the question rather than talking over it.
-    for k, (t, m) in enumerate([(.02, 74), (2.0, 71), (2.25, 69), (2.5, 69), (4.0, 74), (4.25, 76), (4.5, 78)]):
+    pad(5.0, 2.1, CH['Em9'][1:], .045, 1600)
+    for st, ln, root in [(0.0, 2.4, 55), (2.5, 2.4, 54), (5.0, 1.9, 52)]:
+        bass(st, ln, root, .07)
+    # Piano answers each line rather than talking over it.
+    for k, (t, m) in enumerate([(.02, 74), (2.0, 71), (2.25, 69), (3.5, 74), (3.75, 76), (4.0, 78), (6.75, 76)]):
         felt(t, m, .10 if t < 2.4 else .085, -.3 + .15 * k)
+    # Camera-view search: ticks, then a lock; a warm chime on "Found them".
+    lock = T.SEARCH_LOCK_F / T.FPS
+    for t in np.arange(3.55, lock, B / 2):
+        tick(t, .045, (-.5, .5)[int(t * 4) % 2])
+    blip(lock, 2900, .07, .07)
+    blip(lock + .08, 3900, .09, .07)
+    bell(5.10, 85, .055, -.15, ratio=2.0, index=1.5)
+    bell(5.21, 90, .045, .15, ratio=2.0, index=1.5)
 
 
 def section_build():
-    # 5-7 s: dominant pedal, fan spin-up, filtered arp and a fill into the drop.
-    pad(5.0, 2.0, CH['Asus'][1:], .05, 2200)
-    for k in range(16):
-        t = 5.0 + k * B / 4
-        m = CH['Asus'][1 + (k % 4)] + 12
-        pluck(t, m, .035 + .03 * k / 16, (-.4, .4)[k % 2], bright=1500 + 5500 * k / 16)
-    for k in range(4):
-        bass(5.0 + k * B, B * .8, 33 + 12, .14)
-    riser(5.0, 2.0, .11)
-    reverse_swell(7.0, 1.0, .07)
-    for k, t in enumerate(np.arange(6.0, 7.0, B / 4)):
-        clap(t, .03 + .10 * (k / 8) ** 2, verb=.1)
-    for t, m in [(6.5, 50), (6.625, 47), (6.75, 45), (6.875, 43)]:
+    # 7-8 s: dominant pedal, fan spin-up, rising plucks and a fill into the drop.
+    pad(7.0, 1.0, CH['Asus'][1:], .05, 2200)
+    for k in range(8):
+        pluck(7.0 + k * B / 4, CH['Asus'][1 + (k % 4)] + 12, .04 + .04 * k / 8, (-.4, .4)[k % 2], bright=1500 + 5500 * k / 8)
+    bass(7.0, .9, 45, .14)
+    riser(7.0, 1.0, .11)
+    reverse_swell(8.0, .9, .07)
+    for k, t in enumerate(np.arange(7.5, 8.0, B / 4)):
+        clap(t, .04 + .10 * (k / 4) ** 2, verb=.1)
+    for t, m in [(7.5, 50), (7.625, 47), (7.75, 45), (7.875, 43)]:
         tom(t, m, .14)
 
 
@@ -380,79 +386,100 @@ def groove(t0, t1, chords, energy=1.0, hats=True, claps=True, arp=True, kick_on=
             hat(t + 3 * B / 4, .022 * energy, pan=-.35)
 
 
+def sizzle(start, dur, amp=.03):
+    """Oil in a hot pan: sparse crackle over soft hiss."""
+    n = int(dur * SR)
+    t = np.arange(n) / SR
+    pops = np.zeros(n)
+    idx = rng.integers(0, n, int(dur * 140))
+    pops[idx] = rng.uniform(.3, 1, len(idx)) * rng.choice([-1, 1], len(idx))
+    crackle = bp(pops, 2200, 9000)
+    hiss = bp(rng.standard_normal(n), 3000, 11000) * .12
+    env = np.clip(t / .3, 0, 1) * np.clip((dur - t) / .3, 0, 1)
+    place('fx', (crackle * 3 + hiss) * env, start, amp, .25, verb=.08)
+
+
 def arrange():
     section_intro()
     section_build()
-    # 7-11 s: the drop under the title.
-    impact(7.0, .34)
-    subdrop(7.0, 1.6, .22)
-    groove(7.0, 11.0, [(7.0, 'D'), (9.0, 'A/C#')], 1.0)
+    # 8-12 s: the drop under the title.
+    impact(8.0, .34)
+    subdrop(8.0, 1.6, .22)
+    groove(8.0, 12.0, [(8.0, 'D'), (10.0, 'A/C#')], 1.0)
     for j, m in enumerate(MOTIF):
-        bell(7.0 + j * B, m + 12, .05, -.3 + .2 * j, name='keys', verb=.45)
-    # 11-13 s: point-of-view search; filtered, ticking, tense.
-    groove(11.0, 13.0, [(11.0, 'Bm7')], .78, claps=False, arp=True)
-    riser(11.6, 1.4, .06, 800, 6000)
-    for t in np.arange(11.0, 12.1, B / 2):
-        tick(t, .045, (-.5, .5)[int(t * 4) % 2])
-    for t, f in [(11.1, 2200), (11.45, 2200), (11.8, 2600)]:
-        blip(t, f, .05, .045)
-    blip(12.08, 2900, .07, .07)
-    blip(12.16, 3900, .09, .07)
-    # 13-18 s: breakdown for "Found them", warm chime, phone ping.
-    pad(13.0, 2.5, CH['Gmaj7'][1:], .05, 1700)
-    pad(15.5, 2.5, CH['Em9'][1:], .05, 1700)
-    bass(13.0, 2.3, 43, .12)
-    bass(15.5, 2.3, 40, .12)
-    for k, (t, m) in enumerate([(13.0, 71), (14.0, 74), (14.5, 78), (15.5, 76), (16.5, 74), (17.0, 71)]):
-        string(t, m, .07, -.3 + .12 * k)
-    for t in np.arange(13.0, 18.0, B * 2):
-        kick(t, .26)
-    bell(13.55, 85, .06, -.15, ratio=2.0, index=1.5)
-    bell(13.66, 90, .05, .15, ratio=2.0, index=1.5)
-    bell(T.NOTIFICATION['at_s'], 88, .07, .2, ratio=3.0, index=1.2, dur=1.2)
-    bell(T.NOTIFICATION['at_s'] + .12, 95, .06, .25, ratio=3.0, index=1.2, dur=1.2)
-    riser(16.5, 1.5, .09)
-    for k, t in enumerate(np.arange(17.0, 18.0, B / 4)):
-        clap(t, .025 + .08 * (k / 8) ** 2, verb=.1)
-    # 18-22 s: shift change; groove returns, faster harmonic rhythm into the lift.
-    impact(18.0, .22)
-    groove(18.0, 22.0, [(18.0, 'D'), (19.0, 'A/C#'), (20.0, 'Bm7'), (21.0, 'Gmaj7')], 1.0)
-    dock_click(19.95, .16)
-    bell(20.0, 81, .035, 0, ratio=1.0, index=.4, dur=1.4)
-    whir(20.35, 1.9, .010, spin_up=.6, pan=-.4)
-    # 22-24 s: lift; dominant build.
-    groove(22.0, 24.0, [(22.0, 'A')], 1.05, claps=True)
-    riser(22.0, 2.0, .12)
-    reverse_swell(24.0, 1.2, .08)
-    whoosh(22.15, .7, .07, 1, 300, 5000)
-    # 24-27 s: "Not on a screen. / In the room." Big resolve, then air.
-    impact(24.0, .28)
-    groove(24.0, 26.0, [(24.0, 'D')], 1.0, arp=True)
-    pad(26.0, 1.0, CH['Gmaj7'][1:], .045, 2600)
-    bass(26.0, .9, 43, .18)
+        bell(8.0 + j * B, m + 12, .05, -.3 + .2 * j, name='keys', verb=.45)
+    # 12-13.5 s: asked from outside; lighter groove, typing and a reply.
+    groove(12.0, 13.5, [(12.0, 'Bm7')], .70, claps=False)
+    for t in np.arange(12.15, 12.9, .09):
+        tick(t, .02, .1)
+    blip(12.95, 1700, .05, .05)
+    bell(13.27, 86, .04, .1, ratio=2.0, index=.8, dur=.9)
+    # 13.5-17 s: into the kitchen, live view; four knob locks and a confirmation.
+    groove(13.5, 17.0, [(13.5, 'Bm7'), (15.5, 'Gmaj7')], .90)
+    for i in range(4):
+        blip((T.STOVE_LOCK_F + 3 * i) / T.FPS, 2600 + 260 * i, .05, .05, -.3 + .2 * i)
+    bell((T.STOVE_LOCK_F + 14) / T.FPS, 88, .05, 0, ratio=3.0, index=1.0, dur=1.0)
+    # 17-20 s: the olive tree; a breath of air and strings.
+    pad(17.0, 3.0, CH['Em9'][1:], .05, 1600)
+    bass(17.0, 2.9, 40, .11)
+    for k, (t, m) in enumerate([(17.0, 71), (17.5, 74), (18.5, 76), (19.25, 78)]):
+        string(t, m, .07, -.3 + .2 * k)
+    for t in (17.0, 18.0, 19.0):
+        kick(t, .24)
+    bell(T.PLANT_NOTE['at_s'], 81, .035, .2, ratio=1.0, index=.5, dur=1.2)
+    # 20-24 s: evening, cooking; groove returns warm, sizzle, timer.
+    groove(20.0, 24.0, [(20.0, 'Gmaj7'), (22.0, 'D')], .85)
+    sizzle(20.0, 4.0, .028)
+    bell(T.TIMER['at_s'], 90, .045, .3, ratio=2.0, index=.6, dur=.8)
+    bell(T.TIMER['at_s'] + .1, 97, .035, .35, ratio=2.0, index=.6, dur=.8)
+    # 24-27 s: the call; warm break, connect tone.
+    blip(24.0, 1320, .09, .04)
+    blip(24.12, 1760, .12, .04)
+    pad(24.0, 1.5, CH['Gmaj7'][1:], .05, 1800)
+    pad(25.5, 1.5, CH['Em9'][1:], .05, 1800)
+    bass(24.0, 1.4, 43, .12)
+    bass(25.5, 1.4, 40, .12)
+    for k, (t, m) in enumerate([(24.0, 74), (24.75, 78), (25.5, 76), (26.25, 81)]):
+        string(t, m, .06, -.2 + .15 * k)
+    kick(24.0, .26)
+    kick(26.0, .22)
+    # 27-33 s: night; one docks, another lifts; build.
+    impact(27.0, .22)
+    groove(27.0, 31.0, [(27.0, 'D'), (28.0, 'A/C#'), (29.0, 'Bm7'), (30.0, 'Gmaj7')], 1.0)
+    dock_click(28.95, .16)
+    bell(29.0, 81, .035, 0, ratio=1.0, index=.4, dur=1.4)
+    whir(29.35, 1.9, .010, spin_up=.6, pan=-.4)
+    groove(31.0, 33.0, [(31.0, 'A')], 1.05)
+    riser(31.0, 2.0, .12)
+    reverse_swell(33.0, 1.2, .08)
+    whoosh(31.15, .7, .07, 1, 300, 5000)
+    # 33-36 s: "Not on a screen. / In the room." Big resolve, then air.
+    impact(33.0, .28)
+    groove(33.0, 35.0, [(33.0, 'D')], 1.0)
+    pad(35.0, 1.0, CH['Gmaj7'][1:], .045, 2600)
+    bass(35.0, .9, 43, .18)
     for j, m in enumerate(MOTIF):
-        bell(25.0 + j * B / 2, m + 12, .045, -.3 + .2 * j, name='keys')
-    # 27-30 s: logo hit and ring-out.
-    impact(27.0, .30)
-    kick(27.0, .5)
-    pad(27.0, 2.6, CH['Dmaj9'][1:], .05, 2000)
-    bass(27.0, 2.7, 38, .16)
+        bell(34.0 + j * B / 2, m + 12, .045, -.3 + .2 * j, name='keys')
+    # 36-40 s: logo hit; one bell per letter of the wordmark, ring-out.
+    impact(36.0, .30)
+    kick(36.0, .5)
+    pad(36.0, 3.6, CH['Dmaj9'][1:], .05, 2000)
+    bass(36.0, 3.6, 38, .16)
     for j, m in enumerate(MOTIF + [A + 12]):
-        bell(27.0 + j * B / 2, m + 12, .06, -.4 + .2 * j, dur=2.8, name='keys')
-    felt(27.0, 62, .1, 0, dur=3.0)
+        bell(36.0 + j * B / 2, m + 12, .06, -.4 + .2 * j, dur=3.2, name='keys')
+    felt(36.0, 62, .1, 0, dur=3.5)
 
 
 def sound_design():
     # Room air under everything.
     room = lp(rng.standard_normal((N, 2)), 3500) * .0025
     bus['fx'][:] += hp(room, 60)
-    bell(1.55, 93, .025, .1, ratio=1.0, index=.6, dur=1.2)     # indicator wakes
-    whir(5.0, 15.0, .010, spin_up=.55, pan=.1)                   # hero fans, 5.0-20.0
-    whoosh(6.0, .5, .07, -1)
-    whoosh(7.0, .6, .09, 1, 400, 8000)
-    whoosh(11.0, .35, .05, 1)
-    whoosh(13.0, .35, .04, -1)
-    whoosh(24.0, .6, .06, -1, 300, 4000)
+    bell(1.2, 93, .025, .1, ratio=1.0, index=.6, dur=1.2)      # indicator wakes
+    whir(7.0, 21.95, .010, spin_up=.45, pan=.1)                 # day unit's fans until it docks
+    for t, d, a, dr in [(7.5, .4, .06, -1), (12.0, .35, .05, 1), (13.5, .4, .06, -1), (17.0, .35, .04, 1),
+                        (20.0, .35, .04, -1), (24.0, .5, .05, 1), (27.0, .5, .05, -1), (33.0, .6, .06, -1)]:
+        whoosh(t, d, a, dr)
+    whoosh(8.0, .6, .09, 1, 400, 8000)
 
 
 def dialogue():
@@ -463,13 +490,23 @@ def dialogue():
         if sr != SR:
             x = resample_poly(x, SR, sr)
         x = x / max(np.abs(x).max(), 1e-9)
+        meta = next((d for d in T.DIALOGUE if d['id'] == ln['id']), {})
         if ln['who'] == 'float':
             # FLOAT: close, intimate, a touch of small-speaker presence.
             x = hp(x, 140)
             x = x + .18 * bp(x, 2500, 5500)
             place('dialogue', x, ln['start_s'], 1.25, 0.0, verb=.10)
+        elif meta.get('phone'):
+            # Typed/spoken into the app from outside: phone-band voice.
+            x = np.tanh(2.0 * bp(x, 320, 3400)) * .8
+            place('dialogue', x, ln['start_s'], 1.15, 0.0, verb=.0)
+        elif meta.get('via_float'):
+            # A caller heard through FLOAT's small speaker.
+            x = bp(x, 200, 7000)
+            x = x + .25 * bp(x, 2000, 4500)
+            place('dialogue', x, ln['start_s'], 1.2, .05, verb=.12)
         else:
-            # Off-screen person across the room.
+            # Off-screen person in the room.
             x = lp(hp(x, 90), 9000)
             place('dialogue', x, ln['start_s'], 1.15, -.08, verb=.22)
     return timing
@@ -590,8 +627,9 @@ def main():
     meta = dict(bpm=T.BPM, key='D major', duration_s=DUR, sample_rate=SR, seed=20261017,
                 original_synthesis=True, stems=list(stems), kicks=len(KICKS),
                 peak_before_gain=float(peak), sections={
-                    'intro': [0, 5], 'build': [5, 7], 'drop': [7, 11], 'search': [11, 13], 'found': [13, 18],
-                    'shift_change': [18, 22], 'lift': [22, 24], 'thesis': [24, 27], 'end': [27, 30]})
+                    'keys': [0, 7], 'build': [7, 8], 'drop': [8, 12], 'app': [12, 13.5], 'stove': [13.5, 17],
+                    'plant': [17, 20], 'cooking': [20, 24], 'call': [24, 27], 'night': [27, 33], 'thesis': [33, 36],
+                    'end': [36, 40]})
     (OUT / 'score_metadata.json').write_text(json.dumps(meta, indent=1))
     print('score written:', {k: round(float(np.sqrt(np.mean(v ** 2))), 4) for k, v in stems.items()}, flush=True)
 

@@ -29,10 +29,10 @@ QUALITY = {
     'final': dict(width=1920, samples=96, blur=True, haze=False),
 }
 # End-card background is defocused and darkened under type; it needs fewer samples.
-LOW_SAMPLE_SHOTS = {'S12': .5}
+LOW_SAMPLE_SHOTS = {'S18': .5}
 # Optional sun-beam haze (--haze on). Off by default: in tests it read as a milky lift
 # rather than visible beams, at roughly 30-40% more render time.
-HAZE_SHOTS = {'S01', 'S05', 'S11', 'S12'}
+HAZE_SHOTS = {'S01', 'S07', 'S11'}
 
 
 def parse():
@@ -54,11 +54,17 @@ def parse():
 
 def track_points(H):
     hero = H['units'][0]['root']
-    return {
+    pts = {
         'keys': lambda: S.KEYS_AT,
+        'plant': lambda: Vector((-2.98, 2.30, 1.55)),
+        'pan': lambda: S.PAN_AT,
+        'drawing': lambda: Vector((.06, -.66, .40)),
         'hero_pod': lambda: hero.matrix_world @ Vector((0, -.04, S.POD_Z)),
         'hero': lambda: hero.matrix_world.translation.copy(),
     }
+    for i, kp in enumerate(S.KNOBS):
+        pts[f'knob{i}'] = (lambda p=kp: p)
+    return pts
 
 
 def write_tracks(H, cam, sid, f0, f1, path):
@@ -104,7 +110,9 @@ def main():
     sc = bpy.context.scene
     total = 0
     t_start = time.monotonic()
-    for sid, name, f0, f1, _ in T.SHOTS:
+    for sid, name, f0, f1, tod, _ in T.SHOTS:
+        if sid in T.GRAPHIC_SHOTS:
+            continue
         if wanted and sid not in wanted:
             continue
         if explicit is not None:
@@ -119,12 +127,14 @@ def main():
         frames = [f for f in frames if f % sn == si and not (out / f'f_{f:04d}.png').exists()]
         if a.track_only:
             shots.bake(H, cam, sid, a.format)
+            S.set_time_of_day(H, tod)
             write_tracks(H, cam, sid, f0, f1, S.ROOT / 'renders' / a.format / 'tracks.json')
             print('TRACKED', sid, flush=True)
             continue
         if not frames:
             continue
         shots.bake(H, cam, sid, a.format)
+        S.set_time_of_day(H, tod)
         write_tracks(H, cam, sid, f0, f1, S.ROOT / 'renders' / a.format / 'tracks.json')
         sc.cycles.samples = max(16, int(samples * LOW_SAMPLE_SHOTS.get(sid, 1)))
         if H['haze'] is not None:

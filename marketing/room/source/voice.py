@@ -19,7 +19,7 @@ import timeline as T  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'assets' / 'voice'
-VOICES = {'person': ('am_michael', 1.02), 'float': ('af_heart', 0.96)}
+VOICES = {'person': ('am_michael', 1.02), 'float': ('af_heart', 0.96), 'grandma': ('bf_emma', 0.92)}
 SR_IN, SR_OUT = 24000, 48000
 
 

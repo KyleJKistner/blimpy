@@ -229,6 +229,24 @@ def build_materials():
     M['prop_blur'] = prop_blur_material('prop_blur')
     M['pad'] = material('pad', (.03, .032, .036), .5)
     M['outside'] = emissive('outside_view', (1, 1, 1), 1.0)
+    # Kitchen and evening props.
+    M['cabinet'] = material('cabinet', (.105, .19, .16), .42, **{'Coat Weight': .25, 'Coat Roughness': .25})
+    M['counter'] = material('counter', (.86, .85, .82), .22, **{'Coat Weight': .3, 'Coat Roughness': .1})
+    M['tile'] = textured('tile', 'zellige_color', .8, rough=.12, bump_tex='zellige_bump', bump=.35, box=False,
+                         **{'Coat Weight': .6, 'Coat Roughness': .05})
+    M['stainless'] = material('stainless', (.72, .71, .69), .28, 1.0)
+    M['iron'] = material('cast_iron', (.035, .034, .033), .55, .6)
+    M['oil'] = material('oil', (.30, .19, .05), .05, **{'Coat Weight': .8})
+    M['garlic'] = material('garlic', (.93, .89, .82), .55, **{'Subsurface Weight': .2})
+    M['board'] = textured('board', 'walnut_color', 1.0, rough=.5, tint=(1.9, 1.75, 1.55))
+    M['knob_mark'] = material('knob_mark', (.9, .9, .88), .4)
+    M['drawing'] = textured('drawing', 'drawing', 1.0, rough=.85, box=False)
+    M['recipe'] = textured('recipe', 'recipe', 1.0, rough=.85, box=False)
+    M['crayons'] = [material(f'crayon_{i}', c, .5) for i, c in enumerate(
+        [(.75, .12, .10), (.12, .25, .65), (.85, .65, .08), (.15, .45, .2)])]
+    M['flame'] = emissive('flame', (.25, .48, 1.0), 0.0)
+    M['strip'] = emissive('led_strip', (1.0, .78, .55), 0.0)
+    M['shade_glow'] = emissive('shade_glow', (1.0, .80, .58), 0.0)
     return M
 
 
@@ -489,7 +507,14 @@ def build_room(M, coll):
     nt = m.node_tree
     tx = nt.nodes.new('ShaderNodeTexImage')
     tx.image = _image('outside')
-    nt.links.new(tx.outputs['Color'], nt.nodes['Emission'].inputs['Color'])
+    tint = nt.nodes.new('ShaderNodeMix')
+    tint.name = 'view_tint'
+    tint.data_type = 'RGBA'
+    tint.blend_type = 'MULTIPLY'
+    tint.inputs['Factor'].default_value = 1
+    tint.inputs['B'].default_value = (1, 1, 1, 1)
+    nt.links.new(tx.outputs['Color'], tint.inputs['A'])
+    nt.links.new(tint.outputs['Result'], nt.nodes['Emission'].inputs['Color'])
     nt.nodes['Emission'].inputs['Strength'].default_value = 7.0
     o.data.materials.append(m)
     o.visible_diffuse = False
@@ -558,8 +583,8 @@ def build_coffee_table(M, coll, c=(.05, -.45)):
     for i, (dx, dy, w, h, m) in enumerate([(-.12, .1, .24, .035, 0), (-.12, .1, .22, .028, 2), (-.13, .1, .2, .03, 1)]):
         box(f'book_t_{i}', (w, w * .72, h), (c[0] + dx, c[1] + dy, .3975 + .0175 + sum([.035, .028, .03][:i])), M['books'][m],
             bevel=.002, seg=1, coll=coll, rot=(0, 0, math.radians(8 * i - 6)))
-    cylinder('vase', .055, .26, (c[0] + .16, c[1] - .12, .53), M['ceramic'], 48, coll=coll, bevel=.01)
-    cylinder('mug', .042, .095, (c[0] - .2, c[1] - .22, .445), M['ceramic'], 48, coll=coll, bevel=.004)
+    cylinder('vase', .055, .26, (c[0] - .32, c[1] + .28, .53), M['ceramic'], 48, coll=coll, bevel=.01)
+    cylinder('mug', .042, .095, (c[0] - .05, c[1] + .30, .445), M['ceramic'], 48, coll=coll, bevel=.004)
 
 
 def build_rug(M, coll):
@@ -650,6 +675,184 @@ def build_plant(M, coll, base=(-3.0, 2.35)):
     return o
 
 
+def uv_plane(name, w, h, loc, rot, mat, coll):
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([(-w / 2, -h / 2, 0), (w / 2, -h / 2, 0), (w / 2, h / 2, 0), (-w / 2, h / 2, 0)], [], [(0, 1, 2, 3)])
+    uv = me.uv_layers.new()
+    for li, co in enumerate([(0, 0), (1, 0), (1, 1), (0, 1)]):
+        uv.data[li].uv = co
+    me.materials.append(mat)
+    o = link(bpy.data.objects.new(name, me), coll)
+    o.location = loc
+    o.rotation_euler = rot
+    return o
+
+
+KITCHEN = dict(x0=-3.30, x1=.95, front=-2.56, top=.91)
+RANGE_X = (-1.20, -.44)
+KNOBS = [Vector((x, KITCHEN['front'] + .018, .845)) for x in (-1.08, -.93, -.71, -.56)]
+BURNERS = [(-1.0, -2.76), (-.64, -2.76), (-1.0, -3.0), (-.64, -3.0)]
+PAN_AT = Vector((-1.0, -2.76, .995))
+
+
+def build_kitchen(M, coll):
+    """Kitchen run on the front wall: green cabinets, stone top, range, tile, shelves."""
+    k = KITCHEN
+    depth = Y0 - k['front']                        # negative
+    cy = (Y0 + k['front']) / 2
+    for x0, x1 in [(k['x0'], RANGE_X[0]), (RANGE_X[1], k['x1'])]:
+        box(f'base_{x0}', (x1 - x0 - .004, -depth - .02, .78), ((x0 + x1) / 2, cy - .01, .48), M['cabinet'], bevel=.003, seg=2, coll=coll)
+        box(f'toe_{x0}', (x1 - x0, -depth - .08, .09), ((x0 + x1) / 2, cy - .04, .045), M['graphite_matte'], coll=coll)
+        n = max(1, round((x1 - x0) / .6))
+        for i in range(n):
+            xa = x0 + (x1 - x0) * i / n
+            xb = x0 + (x1 - x0) * (i + 1) / n
+            box(f'door_gap_{x0}_{i}', (.004, .004, .74), (xb - .002, k['front'] - .002, .48), M['graphite_matte'], coll=coll)
+            box(f'pull_{x0}_{i}', (.12, .012, .012), ((xa + xb) / 2, k['front'] + .012, .80), M['brass'], bevel=.004, seg=2, coll=coll)
+        box(f'top_{x0}', (x1 - x0, -depth + .02, .04), ((x0 + x1) / 2, cy + .01, k['top'] - .02), M['counter'], bevel=.004, seg=2, coll=coll)
+    # Range: stainless body, oven door, knobs at OFF, cast-iron grates.
+    rx = (RANGE_X[0] + RANGE_X[1]) / 2
+    rw = RANGE_X[1] - RANGE_X[0]
+    box('range_body', (rw, -depth, .90), (rx, cy, .45), M['stainless'], bevel=.006, seg=2, coll=coll)
+    box('oven_door', (rw - .06, .02, .5), (rx, k['front'] + .005, .38), M['stainless'], bevel=.01, seg=3, coll=coll)
+    box('oven_glass', (rw - .2, .004, .22), (rx, k['front'] + .016, .42), M['lens_glass'], bevel=.006, seg=2, coll=coll)
+    cylinder('oven_handle', .011, rw - .16, (rx, k['front'] + .055, .66), M['stainless'], 24, rot=(0, math.pi / 2, 0), coll=coll)
+    box('cooktop', (rw, -depth, .02), (rx, cy, .915), M['iron'], bevel=.004, seg=2, coll=coll)
+    for i, kp in enumerate(KNOBS):
+        cylinder(f'knob_{i}', .021, .028, tuple(kp), M['graphite'], 32, rot=(math.pi / 2, 0, 0), coll=coll, bevel=.004)
+        box(f'knob_mark_{i}', (.003, .004, .014), (kp.x, kp.y + .015, kp.z + .009), M['knob_mark'], coll=coll)
+    flames = []
+    for i, (bx, by) in enumerate(BURNERS):
+        cylinder(f'burner_{i}', .045, .02, (bx, by, .935), M['iron'], 32, coll=coll, bevel=.004)
+        cylinder(f'burner_cap_{i}', .032, .008, (bx, by, .948), M['iron'], 32, coll=coll, bevel=.002)
+        if i == 0:
+            flames.append(tube('flame_ring', ring_points((bx, by, .942), .05, (0, 0, 1), 72), .0045, M['flame'], coll, closed=True))
+    for gx in (-1.0, -.64):
+        for gy in (-2.76, -3.0):
+            for d in (-.08, -.03, .03, .08):
+                box(f'grate_{gx}_{gy}_{d}', (.2, .008, .012), (gx, gy + d, .966), M['iron'], coll=coll)
+                box(f'grate_x_{gx}_{gy}_{d}', (.008, .2, .012), (gx + d, gy, .966), M['iron'], coll=coll)
+    # Skillet on the front-left burner, with oil.
+    pan = cylinder('skillet', .125, .045, (PAN_AT.x, PAN_AT.y, PAN_AT.z), M['iron'], 64, coll=coll, cap=False)
+    so = pan.modifiers.new('solid', 'SOLIDIFY')
+    so.thickness = .005
+    cylinder('skillet_base', .125, .006, (PAN_AT.x, PAN_AT.y, PAN_AT.z - .02), M['iron'], 64, coll=coll)
+    cylinder('skillet_oil', .118, .002, (PAN_AT.x, PAN_AT.y, PAN_AT.z - .015), M['oil'], 64, coll=coll)
+    box('skillet_handle', (.20, .025, .014), (PAN_AT.x + .22, PAN_AT.y + .02, PAN_AT.z + .012), M['iron'], bevel=.005, seg=2,
+        coll=coll, rot=(0, math.radians(-8), math.radians(6)))
+    # Board, garlic, knife; recipe book on a stand.
+    box('board', (.42, .26, .022), (.05, -2.86, k['top'] + .011), M['board'], bevel=.006, seg=3, coll=coll, rot=(0, 0, .08))
+    for i, (gx, gy) in enumerate([(-.04, -2.84), (.08, -2.9)]):
+        g = sphere(f'garlic_{i}', .028, (gx, gy, k['top'] + .05), M['garlic'], 32, 16, (1, 1, .82), coll)
+        g.modifiers.new('sub', 'SUBSURF').levels = 1
+        tube(f'garlic_stem_{i}', [(gx, gy, k['top'] + .07), (gx + .004, gy, k['top'] + .085)], .003, M['garlic'], coll, res=4)
+    for i, (cx, cy2) in enumerate([(.16, -2.80), (.19, -2.83), (.14, -2.85)]):
+        sphere(f'clove_{i}', .009, (cx, cy2, k['top'] + .028), M['garlic'], 16, 8, (1.6, 1, .9), coll)
+    box('knife_blade', (.17, .028, .002), (.15, -2.95, k['top'] + .025), M['stainless'], bevel=.001, seg=1, coll=coll, rot=(0, 0, -.12))
+    box('knife_handle', (.1, .022, .016), (.01, -2.932, k['top'] + .03), M['graphite'], bevel=.006, seg=2, coll=coll, rot=(0, 0, -.12))
+    box('stand', (.20, .03, .26), (.62, -3.05, k['top'] + .13), M['walnut'], bevel=.004, seg=2, coll=coll, rot=(math.radians(-18), 0, 0))
+    for side in (-1, 1):
+        uv_plane(f'recipe_{side}', .145, .2, (.62 + side * .075, -3.025, k['top'] + .15), (math.radians(108), 0, side * .12), M['recipe'], coll)
+    # Backsplash, open shelves with an under-shelf light.
+    uv_plane('backsplash', k['x1'] - k['x0'], .54, ((k['x0'] + k['x1']) / 2, Y0 + .002, k['top'] + .27),
+             (math.radians(90), 0, 0), M['tile'], coll)
+    for z in (1.47, 1.86):
+        box(f'shelf_k_{z}', (3.4, .26, .035), (-1.25, Y0 + .13, z), M['walnut'], bevel=.004, seg=2, coll=coll)
+    strip = box('led_strip', (3.3, .02, .006), (-1.25, Y0 + .2, 1.449), M['strip'], coll=coll)
+    strip.visible_shadow = False
+    import random
+    rnd = random.Random(12)
+    x = -2.85
+    while x < .3:
+        kind = rnd.random()
+        if kind < .45:
+            for j in range(rnd.randint(3, 6)):
+                cylinder(f'plate_{x:.2f}_{j}', .11, .012, (x + .11, Y0 + .14, 1.497 + j * .013), M['ceramic'], 48, coll=coll, bevel=.003)
+            x += .27
+        elif kind < .8:
+            h = rnd.uniform(.12, .22)
+            cylinder(f'jar_{x:.2f}', .055, h, (x + .06, Y0 + .12, 1.4875 + h / 2), rnd.choice([M['ceramic'], M['clay']]), 32, coll=coll, bevel=.008)
+            x += .16
+        else:
+            cylinder(f'bowl_{x:.2f}', .09, .07, (x + .09, Y0 + .13, 1.522), M['clay'], 48, coll=coll, bevel=.02)
+            x += .22
+    light = bpy.data.lights.new('kitchen_strip', 'AREA')
+    light.shape = 'RECTANGLE'
+    light.size, light.size_y = 3.3, .08
+    light.color = (1.0, .76, .52)
+    light.energy = 0
+    lo = link(bpy.data.objects.new('kitchen_strip', light), coll)
+    lo.location = (-1.25, Y0 + .2, 1.44)
+    return dict(flame=M['flame'], strip=(light, 150.0), knobs=KNOBS)
+
+
+def build_drawing(M, coll):
+    """A child's crayon drawing and crayons on the coffee table."""
+    uv_plane('drawing', .297, .21, (.06, -.66, .3986), (0, 0, math.radians(-10)), M['drawing'], coll)
+    for i, (x, y, a) in enumerate([(.30, -.60, .4), (.27, -.67, 1.2), (.33, -.72, 2.3), (.24, -.55, 2.9)]):
+        c = cylinder(f'crayon_{i}', .0045, .085, (x, y, .4035), M['crayons'][i], 12, rot=(math.pi / 2, 0, a), coll=coll)
+        c.modifiers.new('bevel', 'BEVEL').width = .001
+
+
+def build_lamps(M, coll):
+    """Evening practicals: a floor lamp by the sofa and a small lamp on the bookshelf."""
+    lights = []
+    for name, (x, y, z_base, pole, r, h) in {'floor_lamp': (3.18, -1.55, 0, 1.42, .20, .30),
+                                             'shelf_lamp': (X1 - .2, 2.12, .70, .22, .11, .16)}.items():
+        cylinder(f'{name}_base', r * .55, .03, (x, y, z_base + .015), M['stone'], 48, coll=coll, bevel=.006)
+        cylinder(f'{name}_pole', .008, pole, (x, y, z_base + pole / 2), M['brass'], 16, coll=coll)
+        shade = cylinder(f'{name}_shade', r, h, (x, y, z_base + pole + h * .3), M['shade_glow'], 64, coll=coll, cap=False)
+        shade.modifiers.new('solid', 'SOLIDIFY').thickness = .003
+        lamp = bpy.data.lights.new(name, 'POINT')
+        lamp.color = (1.0, .74, .48)
+        lamp.shadow_soft_size = r * .5
+        lamp.energy = 0
+        lo = link(bpy.data.objects.new(name, lamp), coll)
+        lo.location = (x, y, z_base + pole + h * .25)
+        lights.append((lamp, 70.0 if name == 'floor_lamp' else 25.0))
+    return lights
+
+
+TIME_OF_DAY = {
+    # sun elevation/azimuth (deg), sun energy, sun colour, sky mix (0 sky, 1 flat), flat colour, world strength,
+    # window view tint and strength, bounce energy, practicals (0-1), exposure
+    'morning': dict(elev=26, az=30, sun=5.0, col=(1.0, .90, .80), flat=0, sky=.65, view=(1, 1, 1), view_k=7.0,
+                    bounce=60, practical=0, exposure=0.0),
+    'midday': dict(elev=46, az=18, sun=5.5, col=(1.0, .97, .92), flat=0, sky=.85, view=(1, 1, 1), view_k=8.0,
+                   bounce=45, practical=0, exposure=0.0),
+    'golden': dict(elev=17, az=33, sun=6.5, col=(1.0, .80, .60), flat=0, sky=.55, view=(1, 1, 1), view_k=7.0,
+                   bounce=70, practical=0, exposure=0.0),
+    'evening': dict(elev=-4, az=33, sun=0.0, col=(1, 1, 1), flat=1, sky=.55, flat_col=(.10, .15, .32),
+                    view=(.30, .42, .75), view_k=1.4, bounce=0, practical=1.0, exposure=.35),
+    'night': dict(elev=-20, az=33, sun=0.0, col=(1, 1, 1), flat=1, sky=.35, flat_col=(.025, .035, .08),
+                  view=(.06, .09, .19), view_k=1.0, bounce=0, practical=.85, exposure=.45),
+}
+
+
+def set_time_of_day(H, tod):
+    p = TIME_OF_DAY['golden' if tod == 'graphic' else tod]
+    L = H['lighting']
+    sun, so = L['sun'], L['sun_obj']
+    sun.energy = p['sun']
+    sun.color = p['col']
+    so.hide_render = p['sun'] <= 0
+    d = Vector((math.cos(math.radians(p['az'])), math.sin(math.radians(p['az'])), -math.tan(math.radians(max(p['elev'], 1))))).normalized()
+    so.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
+    L['sky_node'].sun_elevation = math.radians(max(p['elev'], 0))
+    L['sky_mix'].inputs['Factor'].default_value = p['flat']
+    L['sky_mix'].inputs['B'].default_value = (*p.get('flat_col', (0, 0, 0)), 1)
+    L['background'].inputs['Strength'].default_value = p['sky']
+    L['view_emission'].default_value = p['view_k']
+    L['view_tint'].inputs['B'].default_value = (*p['view'], 1)
+    L['bounce'].energy = p['bounce']
+    L['bounce_obj'].hide_render = p['bounce'] <= 0
+    for light, base in H['practicals']:
+        light.energy = base * p['practical']
+    H['M']['strip'].node_tree.nodes['Emission'].inputs['Strength'].default_value = 6.0 * p['practical']
+    H['M']['shade_glow'].node_tree.nodes['Emission'].inputs['Strength'].default_value = 3.5 * p['practical']
+    bpy.context.scene.view_settings.exposure = p['exposure']
+
+
 # ----------------------------------------------------------------------------
 # Lighting and render configuration
 # ----------------------------------------------------------------------------
@@ -667,7 +870,11 @@ def build_lighting(coll, sun_elev=17, sun_az=33, volumetric=False):
     sky.sun_rotation = math.radians(180 + sun_az)
     sky.air_density = 1.2
     sky.dust_density = 2.5
-    nt.links.new(sky.outputs[0], nt.nodes['Background'].inputs[0])
+    mix = nt.nodes.new('ShaderNodeMix')
+    mix.data_type = 'RGBA'
+    mix.inputs['Factor'].default_value = 0
+    nt.links.new(sky.outputs[0], mix.inputs['A'])
+    nt.links.new(mix.outputs['Result'], nt.nodes['Background'].inputs[0])
     nt.nodes['Background'].inputs['Strength'].default_value = .55
     # Sun travelling into the room from the window wall (-X), low and warm.
     sun = bpy.data.lights.new('sun', 'SUN')
@@ -710,8 +917,11 @@ def build_lighting(coll, sun_elev=17, sun_az=33, volumetric=False):
         vnt.links.new(pv.outputs[0], vnt.nodes['Material Output'].inputs['Volume'])
         haze = box('haze', (X1 - X0 - .05, Y1 - Y0 - .05, ZC - .05), ((X0 + X1) / 2, (Y0 + Y1) / 2, ZC / 2), vol, coll=coll)
         haze.visible_shadow = False
-        return so, haze
-    return so, None
+    else:
+        haze = None
+    handles = dict(sun=sun, sun_obj=so, sky_node=sky, sky_mix=mix, background=nt.nodes['Background'],
+                   bounce=bounce, bounce_obj=bo)
+    return handles, haze
 
 
 def configure_render(width, height, samples, gpu=False, motion_blur=True, fps=24, film_grade='AgX - Medium High Contrast',
@@ -791,6 +1001,14 @@ def build(volumetric=False):
     build_shelf(M, coll)
     build_plant(M, coll)
     keys = build_keys(M, coll)
-    sun, haze = build_lighting(coll, volumetric=volumetric)
+    kitchen = build_kitchen(M, coll)
+    build_drawing(M, coll)
+    lamps = build_lamps(M, coll)
+    lighting, haze = build_lighting(coll, volumetric=volumetric)
+    lighting['view_emission'] = M['outside'].node_tree.nodes['Emission'].inputs['Strength']
+    lighting['view_tint'] = M['outside'].node_tree.nodes['view_tint']
     units = [make_float(t, M, coll) for t in ('hero', 'dock_a', 'dock_b')]
-    return dict(M=M, units=units, pads=pads, keys=keys, sun=sun, haze=haze)
+    H = dict(M=M, units=units, pads=pads, keys=keys, lighting=lighting, haze=haze, kitchen=kitchen,
+             practicals=lamps + [kitchen['strip']])
+    set_time_of_day(H, 'golden')
+    return H

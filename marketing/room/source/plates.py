@@ -16,13 +16,16 @@ from mathutils import Vector
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import scene as S       # noqa: E402
 import shots            # noqa: E402
+import timeline as T    # noqa: E402
 
 # name: (shot whose performance to use, frame, camera override or None, hide keys)
 PLATES = {
     'P1_ask_start': ('S01', 0, ((2.55, -2.55, 1.32), (-.05, .45, 1.27), 30, 4.0), False),
-    'P2_pickup_start': ('S07', 371, None, False),
-    'P2_pickup_end': ('S07', 371, None, True),
-    'P3_thanks_start': ('S08', 420, ((.48, -.62, 1.50), (1.22, .30, 1.08), 32, 2.8), False),
+    'P2_pickup_start': ('S04', 165, None, False),
+    'P2_pickup_end': ('S04', 165, None, True),
+    'P3_thanks_start': ('S04', 160, ((.48, -.62, 1.50), (1.22, .30, 1.08), 32, 2.8), False),
+    'P4_cook_start': ('S12', 500, ((.35, -1.55, 1.55), (-.75, -2.70, 1.00), 32, 2.8), False),
+    'P5_call_start': ('S14', 600, ((.95, -.05, 1.05), (-.10, -.70, .55), 30, 2.8), False),
 }
 
 
@@ -50,6 +53,7 @@ def main():
         if a.only and name not in a.only.split(','):
             continue
         shots.bake(H, cam, sid)
+        S.set_time_of_day(H, T.shot(sid)[4])
         sc = bpy.context.scene
         sc.frame_set(frame)
         if override:

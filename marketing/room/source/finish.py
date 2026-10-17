@@ -103,8 +103,9 @@ def grade(img, frame, sid):
     r = ((xx - w / 2) / (w / 2)) ** 2 * .6 + ((yy - h / 2) / (h / 2)) ** 2 * .6
     img = img * (1 - .14 * np.clip(r, 0, 1.4)[..., None] ** 1.3)
     # The drop: a short exposure kick on the title cut.
-    if 168 <= frame < 173:
-        img = img * (1 + .32 * math.exp(-(frame - 168) / 1.4))
+    drop = T.shot('S07')[2]
+    if drop <= frame < drop + 5:
+        img = img * (1 + .32 * math.exp(-(frame - drop) / 1.4))
     # Grain, regenerated per frame.
     g = np.random.default_rng(frame).standard_normal((h // 2, w // 2)).astype(np.float32)
     g = cv2.resize(g, (w, h), interpolation=cv2.INTER_LINEAR)
@@ -198,38 +199,53 @@ def reveal_line(L, base, text, x, y, size, weight, t, t0, color=WHITE, tracking=
     shadowed(base, lay, 14 * L.s, .45)
 
 
+DIALOGUE = {d['id']: d for d in T.DIALOGUE}
+
+
 def caption(L, base, t, timing):
-    for ln in timing['lines']:
+    lines = sorted(timing['lines'], key=lambda x: x['start_s'])
+    for n, ln in enumerate(lines):
+        meta = DIALOGUE.get(ln['id'], {})
+        if meta.get('phone'):
+            continue                    # shown as the message bubble in the app screen
         a = ln['start_s'] - .05
         b = ln['start_s'] + ln['duration_s'] + .45
+        if n + 1 < len(lines):
+            b = min(b, lines[n + 1]['start_s'] - .08)
         if not a <= t < b:
             continue
         op = clamp((t - a) / .12) * clamp((b - t) / .15)
+        scrim(L, base, 'bottom', .38, op, .22)
         fnt = font(40 * L.s * (1.08 if L.fmt == 'feed' else 1), 'Medium')
         lay = text_layer(L)
         d = ImageDraw.Draw(lay)
         text = ln['text']
-        if L.fmt == 'feed' and len(text) > 30:
+        prefix = 'Grandma, via FLOAT:  ' if ln['who'] == 'grandma' else ''
+        if L.fmt == 'feed' and len(prefix + text) > 30:
             words = text.split()
             lines = [' '.join(words[:len(words) // 2 + 1]), ' '.join(words[len(words) // 2 + 1:])]
         else:
             lines = [text]
         lh = fnt.size * 1.25
         y0 = L.caption_y - lh * (len(lines) - 1)
+        pf = font(fnt.size * .78, 'Regular')
+        pw = d.textlength(prefix, font=pf) if prefix else 0
         for i, s in enumerate(lines):
-            wdt = d.textlength(s, font=fnt)
+            wdt = d.textlength(s, font=fnt) + (pw if i == 0 else 0)
             x = L.W / 2 - wdt / 2
+            if i == 0 and prefix:
+                d.text((x, y0 + fnt.size * .16), prefix, font=pf, fill=(*AMBER, int(235 * op)))
+                x += pw
             if ln['who'] == 'float' and i == 0:
                 r = fnt.size * .17
-                cx = x - fnt.size * .55
-                cy = y0 + fnt.size * .62
-                d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(*AMBER, int(255 * op)))
+                d.ellipse((x - fnt.size * .55 - r, y0 + fnt.size * .62 - r, x - fnt.size * .55 + r, y0 + fnt.size * .62 + r),
+                          fill=(*AMBER, int(255 * op)))
             d.text((x, y0 + i * lh), s, font=fnt, fill=(*WHITE, int(255 * op)))
         shadowed(base, lay, 12 * L.s, .7 * op)
 
 
 def disclosure_label(L, base, t):
-    if t >= 27.0:
+    if t >= T.END_CARD_S:
         return
     lay = text_layer(L)
     d = ImageDraw.Draw(lay)
@@ -239,23 +255,39 @@ def disclosure_label(L, base, t):
     shadowed(base, lay, 6, .5)
 
 
+def chyron(L, base, t):
+    """Small feature label, top left, with an amber rule that draws on."""
+    for c in T.CHYRONS:
+        if not c['start_s'] <= t < c['end_s']:
+            continue
+        k = ease_out((t - c['start_s']) / .35)
+        op = k * clamp((c['end_s'] - t) / .2)
+        s = L.s if L.fmt == 'wide' else 1.0
+        x, y = L.margin * .75, (64 if L.fmt == 'wide' else 92) * s
+        if T.shot_at(int(t * T.FPS))[0] in ('S03', 'S10'):
+            x, y = 62 * s, 132 * s                 # clear of the viewfinder labels
+        lay = text_layer(L)
+        d = ImageDraw.Draw(lay)
+        d.line((x, y + 9 * s, x + 34 * s * k, y + 9 * s), fill=(*AMBER, int(255 * op)), width=max(2, int(3 * s)))
+        draw_tracked(d, (x + 48 * s - 10 * s * (1 - k), y - 2 * s), c['text'], font(19 * s, 'SemiBold'),
+                     (*WHITE, int(240 * op)), .16)
+        shadowed(base, lay, 8, .55 * op)
+
+
 def scrim(L, base, side, strength, op, extent=.45):
     """Soft dark gradient behind type, faded with the type itself."""
     if op <= 0:
         return
     n = int((L.H if side in ('top', 'bottom') else L.W) * extent)
     ramp = (np.linspace(1, 0, n) ** 1.6 * strength * op * 255).astype(np.uint8)
+    alpha = np.zeros((L.H, L.W), np.uint8)
     if side == 'bottom':
-        alpha = np.zeros((L.H, L.W), np.uint8)
         alpha[L.H - n:, :] = ramp[::-1, None]
     elif side == 'top':
-        alpha = np.zeros((L.H, L.W), np.uint8)
         alpha[:n, :] = ramp[:, None]
     elif side == 'right':
-        alpha = np.zeros((L.H, L.W), np.uint8)
         alpha[:, L.W - n:] = ramp[None, ::-1]
     else:
-        alpha = np.zeros((L.H, L.W), np.uint8)
         alpha[:, :n] = ramp[None, :]
     layer = Image.new('RGBA', (L.W, L.H), (8, 9, 11, 0))
     layer.putalpha(Image.fromarray(alpha))
@@ -266,97 +298,144 @@ def titles(L, base, t):
     s = L.s
     m = L.margin
     # Scrims first, one per title moment, so stacked lines share one gradient.
-    for sid, side, strength, at in [('S05', 'bottom', .55, 7.5), ('S09', 'top', .40, 19.95),
-                                    ('S11', 'right' if L.fmt == 'wide' else 'bottom', .50, 24.25)]:
-        _, _, a, b, _ = next(x for x in T.SHOTS if x[0] == sid)
+    for sid, side, strength, at in [('S07', 'bottom', .55, 8.5), ('S15', 'top', .40, 28.95),
+                                    ('S17', 'right' if L.fmt == 'wide' else 'bottom', .50, 33.25)]:
+        _, _, a, b, _, _ = T.shot(sid)
         if a / T.FPS <= t < b / T.FPS:
             scrim(L, base, side, strength, ease_out((t - at + .1) / .5) * clamp((b / T.FPS - t) / .18),
                   .5 if side in ('left', 'right') else .42)
-    for i, ti in enumerate(T.TITLES):
+    for ti in T.TITLES:
         sid = ti['shot']
-        _, _, a, b, _ = next(x for x in T.SHOTS if x[0] == sid)
+        _, _, a, b, _, _ = T.shot(sid)
         if not a / T.FPS <= t < b / T.FPS:
             continue
         end = b / T.FPS
-        if sid == 'S05':
+        if sid == 'S07':
             y = L.H - (262 if L.fmt == 'wide' else 420) * s
             reveal_line(L, base, ti['lines'][0], m, y, 132 * s, 'SemiBold', t, ti['at_s'], exit_t=end)
             reveal_line(L, base, ti['sub'], m + 4 * s, y + 158 * s, 38 * s, 'Regular', t, ti['at_s'] + .22,
                         color=(232, 228, 220), tracking=0, exit_t=end)
-        elif sid == 'S09':
+        elif sid == 'S15':
             # Top right: the unit lifting off rises through the left of frame.
             y = (120 if L.fmt == 'wide' else 150) * s + (88 * s if ti.get('add') else 0)
             reveal_line(L, base, ti['lines'][0], L.W - m, y, 76 * s, 'SemiBold', t, ti['at_s'], anchor='r', exit_t=end)
-        elif sid == 'S11':
-            x = L.W * (.56 if L.fmt == 'wide' else .0) + (0 if L.fmt == 'wide' else m)
+        elif sid == 'S17':
+            x = L.W * .56 if L.fmt == 'wide' else m
             y = (L.H * .36 if L.fmt == 'wide' else L.H * .74) + (104 * s if ti.get('add') else 0)
             col = WHITE if not ti.get('add') else AMBER
             reveal_line(L, base, ti['lines'][0], x, y, 92 * s, 'SemiBold', t, ti['at_s'], color=col, exit_t=end)
 
 
-def notification(L, base, t, thumb):
-    t0 = T.NOTIFICATION['at_s']
-    _, _, a, b, _ = next(x for x in T.SHOTS if x[0] == 'S08')
-    if not t0 <= t < b / T.FPS:
-        return
-    s = L.s if L.fmt == 'wide' else 1.0
-    cw, ch = int(600 * s), int(156 * s)
-    x = L.W - cw - int(70 * s) if L.fmt == 'wide' else (L.W - cw) // 2
-    yrest = int(70 * s) if L.fmt == 'wide' else int(120 * s)
-    k = spring((t - t0) / .55)
-    y = int(yrest - (1 - k) * (ch + yrest + 20))
-    op = clamp((t - t0) / .12) * clamp((b / T.FPS - t) / .12)
-    # Frosted glass from the frame underneath.
-    x0, y0 = max(0, x), max(0, y)
-    x1, y1 = min(L.W, x + cw), min(L.H, y + ch)
-    if x1 <= x0 or y1 <= y0:
-        return
-    region = base.crop((x0, y0, x1, y1)).convert('RGB').filter(ImageFilter.GaussianBlur(22 * s))
-    region = Image.blend(region, Image.new('RGB', region.size, (246, 244, 240)), .72)
-    mask = Image.new('L', (cw, ch), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, cw - 1, ch - 1), radius=int(30 * s), fill=int(255 * op))
-    shadow = Image.new('RGBA', base.size, (0, 0, 0, 0))
-    sm = Image.new('L', base.size, 0)
-    ImageDraw.Draw(sm).rounded_rectangle((x, y + 10 * s, x + cw, y + ch + 10 * s), radius=int(30 * s), fill=int(90 * op))
-    shadow.putalpha(sm.filter(ImageFilter.GaussianBlur(22 * s)))
-    base.alpha_composite(shadow)
-    card = Image.new('RGBA', (cw, ch))
-    card.paste(region, (x0 - x, y0 - y))
-    d = ImageDraw.Draw(card)
-    # App icon: amber tile with a small sphere glyph.
-    ic = int(62 * s)
-    ix, iy = int(22 * s), int(22 * s)
-    d.rounded_rectangle((ix, iy, ix + ic, iy + ic), radius=int(15 * s), fill=(255, 168, 76))
-    r = ic * .24
-    cx, cy = ix + ic / 2, iy + ic * .44
-    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(255, 250, 242))
-    d.rounded_rectangle((cx - r * .45, cy + r * 1.05, cx + r * .45, cy + r * 1.45), radius=int(2 * s), fill=(255, 250, 242))
-    tx = ix + ic + int(18 * s)
-    draw_tracked(d, (tx, int(20 * s)), 'FLOAT', font(20 * s, 'SemiBold'), (60, 62, 66), .08)
-    now_x = cw - int(((112 + 44) if thumb is not None else 28) * s)
-    d.text((now_x, int(20 * s)), 'now', font=font(19 * s, 'Regular'), fill=(110, 112, 116), anchor='ra')
-    d.text((tx, int(50 * s)), T.NOTIFICATION['title'], font=font(30 * s, 'SemiBold'), fill=(18, 19, 21))
-    d.text((tx, int(92 * s)), T.NOTIFICATION['body'], font=font(23 * s, 'Regular'), fill=(58, 60, 64))
-    if thumb is not None:
-        th = int(112 * s)
-        tim = thumb.resize((th, th), Image.Resampling.LANCZOS)
-        tmask = Image.new('L', (th, th), 0)
-        ImageDraw.Draw(tmask).rounded_rectangle((0, 0, th - 1, th - 1), radius=int(14 * s), fill=255)
-        card.paste(tim, (cw - th - int(22 * s), (ch - th) // 2), tmask)
-    card.putalpha(Image.composite(mask, Image.new('L', mask.size, 0), mask))
-    base.alpha_composite(card, (x, y))
-    lay = text_layer(L)
-    dd = ImageDraw.Draw(lay)
-    draw_tracked(dd, (x + cw - 4 * s, y + ch + 14 * s), 'SIMULATED NOTIFICATION', font(12 * max(s, .9), 'Medium'),
-                 (*WHITE, int(190 * op)), .14, anchor='r')
-    shadowed(base, lay, 5, .6)
+def pill(d, box, fill, outline=None):
+    x0, y0, x1, y1 = box
+    d.rounded_rectangle(box, radius=int((y1 - y0) / 2), fill=fill, outline=outline, width=1 if outline else 0)
 
 
-def pov_overlay(L, base, t, frame, tracks, k):
-    s = L.s if L.fmt == 'wide' else 1.0
+def simulated_tag(L, base, x, y, op, anchor='l'):
     lay = text_layer(L)
     d = ImageDraw.Draw(lay)
-    # Viewfinder corners.
+    draw_tracked(d, (x, y), 'SIMULATED', font(12 * max(L.s, .9), 'Medium'), (*WHITE, int(190 * op)), .16, anchor=anchor)
+    shadowed(base, lay, 5, .6 * op)
+
+
+# ----------------------------------------------------------------------------
+# App screen (S08): asked from outside the house
+# ----------------------------------------------------------------------------
+
+_bokeh = {}
+
+
+def app_background(L):
+    key = (L.W, L.H)
+    if key not in _bokeh:
+        rng = np.random.default_rng(5)
+        img = np.zeros((L.H, L.W, 3), np.float32)
+        yy, xx = np.mgrid[0:L.H, 0:L.W]
+        img += np.array([.13, .11, .10])[None, None, :] * (1 - yy[..., None] / L.H * .6)
+        for _ in range(70):
+            cx, cy = rng.uniform(0, L.W), rng.uniform(0, L.H * .8)
+            r = rng.uniform(.02, .09) * L.W
+            col = np.array(rng.choice([[1.0, .72, .40], [.95, .85, .70], [.55, .70, .95]])) * rng.uniform(.10, .35)
+            disc = np.clip((r - np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2)) / 6, 0, 1)
+            img += disc[..., None] * col[None, None, :]
+        img = cv2.GaussianBlur(img, (0, 0), 3)
+        _bokeh[key] = np.clip(img, 0, 1)
+    return _bokeh[key]
+
+
+def app_screen(L, base, t):
+    t0 = T.shot('S08')[2] / T.FPS
+    t1 = T.shot('S08')[3] / T.FPS
+    s = L.s if L.fmt == 'wide' else 1.15
+    ph = int((880 if L.fmt == 'wide' else 980) * s)
+    pw = int(ph * .47)
+    k = spring((t - t0) / .5)
+    px = L.W // 2 - pw // 2
+    py = int(L.H / 2 - ph / 2 + (1 - k) * L.H * .5)
+    lay = text_layer(L)
+    d = ImageDraw.Draw(lay)
+    d.rounded_rectangle((px - 10 * s, py - 10 * s, px + pw + 10 * s, py + ph + 10 * s), radius=int(64 * s), fill=(16, 16, 18, 255))
+    d.rounded_rectangle((px, py, px + pw, py + ph), radius=int(56 * s), fill=(248, 246, 242, 255))
+    # Header.
+    hy = py + 70 * s
+    r = 20 * s
+    d.ellipse((px + 34 * s, hy, px + 34 * s + 2 * r, hy + 2 * r), fill=(255, 168, 76))
+    d.ellipse((px + 34 * s + r * .55, hy + r * .45, px + 34 * s + r * 1.45, hy + r * 1.35), fill=(255, 250, 242))
+    d.text((px + 34 * s + 2 * r + 14 * s, hy - 1 * s), 'FLOAT', font=font(24 * s, 'SemiBold'), fill=(20, 20, 22))
+    d.ellipse((px + 34 * s + 2 * r + 15 * s, hy + 31 * s, px + 34 * s + 2 * r + 25 * s, hy + 41 * s), fill=(70, 180, 100))
+    d.text((px + 34 * s + 2 * r + 31 * s, hy + 27 * s), 'Home · online', font=font(17 * s, 'Regular'), fill=(110, 110, 114))
+    d.line((px + 24 * s, hy + 66 * s, px + pw - 24 * s, hy + 66 * s), fill=(225, 222, 216), width=1)
+    fs = font(19 * s, 'Regular')
+    d.text((px + pw / 2, hy + 96 * s), 'Today 8:02 AM', font=fs, fill=(150, 148, 144), anchor='ma')
+    early = [('me', 'Have a good day, Float.'), ('float', 'You too. Keys are in your bag.')]
+    ey = hy + 136 * s
+    for who, msg in early:
+        fm = font(22 * s, 'Regular')
+        mw = d.textlength(msg, font=fm)
+        if who == 'me':
+            d.rounded_rectangle((px + pw - 28 * s - mw - 36 * s, ey, px + pw - 28 * s, ey + 54 * s), radius=int(24 * s), fill=(250, 214, 172))
+            d.text((px + pw - 28 * s - mw - 18 * s, ey + 13 * s), msg, font=fm, fill=(70, 50, 30))
+        else:
+            d.rounded_rectangle((px + 28 * s, ey, px + 64 * s + mw, ey + 54 * s), radius=int(24 * s), fill=(236, 233, 228))
+            d.text((px + 46 * s, ey + 13 * s), msg, font=fm, fill=(80, 80, 84))
+        ey += 72 * s
+    d.text((px + pw / 2, ey + 22 * s), 'Today 12:40 PM', font=fs, fill=(150, 148, 144), anchor='ma')
+    d.rounded_rectangle((px + 24 * s, py + ph - 110 * s, px + pw - 24 * s, py + ph - 52 * s), radius=int(29 * s),
+                        outline=(220, 217, 211), width=max(1, int(2 * s)))
+    d.text((px + 50 * s, py + ph - 96 * s), 'Message FLOAT', font=font(21 * s, 'Regular'), fill=(170, 168, 164))
+    # User bubble types itself, then FLOAT replies.
+    q = T.APP['question']
+    n = int(len(q) * clamp((t - (t0 + .15)) / .75))
+    by = py + ph * .50
+    if n > 0:
+        fq = font(25 * s, 'Medium')
+        txt = q[:n]
+        tw = d.textlength(q, font=fq)
+        bx1 = px + pw - 28 * s
+        d.rounded_rectangle((bx1 - tw - 40 * s, by, bx1, by + 62 * s), radius=int(26 * s), fill=(255, 168, 76))
+        d.text((bx1 - tw - 20 * s, by + 15 * s), txt, font=fq, fill=(255, 255, 255))
+    if t > t0 + 1.0:
+        fr = font(25 * s, 'Medium')
+        ry = by + 86 * s
+        if t < t0 + 1.25:
+            d.rounded_rectangle((px + 28 * s, ry, px + 128 * s, ry + 62 * s), radius=int(26 * s), fill=(232, 229, 224))
+            for j in range(3):
+                a = .4 + .6 * abs(math.sin((t * 6 + j * .7)))
+                cx = px + 58 * s + j * 22 * s
+                d.ellipse((cx - 6 * s, ry + 25 * s, cx + 6 * s, ry + 37 * s), fill=(120, 120, 124, int(255 * a)))
+        else:
+            rw = d.textlength(T.APP['reply'], font=fr)
+            d.rounded_rectangle((px + 28 * s, ry, px + 68 * s + rw, ry + 62 * s), radius=int(26 * s), fill=(232, 229, 224))
+            d.text((px + 48 * s, ry + 15 * s), T.APP['reply'], font=fr, fill=(30, 30, 32))
+    base.alpha_composite(lay)
+    simulated_tag(L, base, L.W / 2, py + ph + 34 * s, clamp((t - t0) / .3) * clamp((t1 - t) / .1), anchor='m')
+
+
+# ----------------------------------------------------------------------------
+# Camera-view overlays: search (S03) and remote live view (S10)
+# ----------------------------------------------------------------------------
+
+def viewfinder(L, d, left, right, s):
     pad, ln = int(56 * s), int(46 * s)
     for sx, sy in [(0, 0), (1, 0), (0, 1), (1, 1)]:
         x = pad if sx == 0 else L.W - pad
@@ -365,32 +444,40 @@ def pov_overlay(L, base, t, frame, tracks, k):
         dy = ln if sy == 0 else -ln
         d.line((x, y, x + dx, y), fill=(*WHITE, 200), width=max(2, int(2 * s)))
         d.line((x, y, x, y + dy), fill=(*WHITE, 200), width=max(2, int(2 * s)))
-    draw_tracked(d, (pad + 6 * s, pad + 18 * s), 'FLOAT  ·  CAMERA VIEW', font(17 * s, 'Medium'), (*WHITE, 220), .12)
-    draw_tracked(d, (L.W - pad - 6 * s, pad + 18 * s), 'SIMULATED', font(17 * s, 'Medium'), (*AMBER, 235), .14, anchor='r')
+    draw_tracked(d, (pad + 6 * s, pad + 18 * s), left, font(17 * s, 'Medium'), (*WHITE, 220), .12)
+    draw_tracked(d, (L.W - pad - 6 * s, pad + 18 * s), right, font(17 * s, 'Medium'), (*AMBER, 235), .14, anchor='r')
+    return pad
+
+
+def bracket(d, x, y, bw, bh, col, al, s):
+    c = 18 * s
+    for sx, sy in [(-1, -1), (1, -1), (-1, 1), (1, 1)]:
+        ex, ey = x + sx * bw / 2, y + sy * bh / 2
+        d.line((ex, ey, ex - sx * c, ey), fill=(*col, al), width=max(2, int(3 * s)))
+        d.line((ex, ey, ex, ey - sy * c), fill=(*col, al), width=max(2, int(3 * s)))
+
+
+def search_overlay(L, base, t, frame, tracks, k):
+    s = L.s if L.fmt == 'wide' else 1.0
+    lay = text_layer(L)
+    d = ImageDraw.Draw(lay)
+    pad = viewfinder(L, d, 'FLOAT  ·  CAMERA VIEW', 'SIMULATED', s)
     cx, cy = L.W / 2, L.H / 2
     d.line((cx - 10 * s, cy, cx + 10 * s, cy), fill=(*WHITE, 120), width=1)
     d.line((cx, cy - 10 * s, cx, cy + 10 * s), fill=(*WHITE, 120), width=1)
-    row = tracks.get(str(frame)) if tracks else None
-    lock_f = 290
+    row = tracks.get(str(frame))
+    a, lock_f = T.shot('S03')[2], T.SEARCH_LOCK_F
     if frame < lock_f:
-        # Scanning sweep.
-        u = (frame - 264) / (lock_f - 264)
-        y = int(L.H * (.12 + .78 * u))
+        y = int(L.H * (.12 + .78 * (frame - a) / (lock_f - a)))
         for i in range(24):
-            a = int(55 * (1 - i / 24))
-            d.line((pad, y - i * 3, L.W - pad, y - i * 3), fill=(*WHITE, a), width=1)
+            d.line((pad, y - i * 3, L.W - pad, y - i * 3), fill=(*WHITE, int(55 * (1 - i / 24))), width=1)
     if row and frame >= lock_f - 4:
         kx, ky = distort_point(row['keys'][0] * L.W, row['keys'][1] * L.H, L.W, L.H, k)
         grow = 1 + 1.4 * (1 - ease_out((frame - (lock_f - 4)) / 6))
         bw, bh = 96 * s * grow, 70 * s * grow
-        col = AMBER if frame >= lock_f else WHITE
-        al = 255 if frame >= lock_f else 150
-        c = 18 * s
-        for sx, sy in [(-1, -1), (1, -1), (-1, 1), (1, 1)]:
-            ex, ey = kx + sx * bw / 2, ky + sy * bh / 2
-            d.line((ex, ey, ex - sx * c, ey), fill=(*col, al), width=max(2, int(3 * s)))
-            d.line((ex, ey, ex, ey - sy * c), fill=(*col, al), width=max(2, int(3 * s)))
-        if frame >= lock_f:
+        locked = frame >= lock_f
+        bracket(d, kx, ky, bw, bh, AMBER if locked else WHITE, 255 if locked else 150, s)
+        if locked:
             op = ease_out((frame - lock_f) / 5)
             lx, ly = kx + bw / 2 + 16 * s, ky - bh / 2 - 4 * s
             draw_tracked(d, (lx, ly), 'KEYS', font(24 * s, 'SemiBold'), (*AMBER, int(255 * op)), .12)
@@ -398,9 +485,128 @@ def pov_overlay(L, base, t, frame, tracks, k):
     shadowed(base, lay, 6, .55)
 
 
+def live_overlay(L, base, t, frame, tracks, k):
+    s = L.s if L.fmt == 'wide' else 1.0
+    lay = text_layer(L)
+    d = ImageDraw.Draw(lay)
+    pad = viewfinder(L, d, '● LIVE  ·  KITCHEN', 'SIMULATED', s)
+    d.text((pad + 6 * s, L.H - pad - 40 * s), '12:41 PM', font=font(18 * s, 'Medium'), fill=(*WHITE, 200))
+    row = tracks.get(str(frame))
+    if row:
+        for i in range(4):
+            fk = frame - (T.STOVE_LOCK_F + 3 * i)
+            if fk < -2:
+                continue
+            x, y = distort_point(row[f'knob{i}'][0] * L.W, row[f'knob{i}'][1] * L.H, L.W, L.H, k)
+            grow = 1 + .8 * (1 - ease_out((fk + 2) / 6))
+            bracket(d, x, y, 74 * s * grow, 74 * s * grow, AMBER if fk >= 0 else WHITE, 255 if fk >= 0 else 140, s)
+            if fk >= 0:
+                op = ease_out(fk / 5)
+                draw_tracked(d, (x, y + 50 * s), 'OFF', font(20 * s, 'SemiBold'), (*AMBER, int(255 * op)), .14, anchor='m')
+        fs = frame - (T.STOVE_LOCK_F + 14)
+        if fs >= 0:
+            op = ease_out(fs / 6)
+            msg = 'All 4 burners off'
+            fm = font(24 * s, 'SemiBold')
+            tw = d.textlength(msg, font=fm)
+            bx, by = L.W / 2 - tw / 2 - 26 * s, pad + 70 * s
+            pill(d, (bx, by, bx + tw + 52 * s, by + 48 * s), (14, 15, 17, int(200 * op)))
+            d.text((bx + 26 * s, by + 10 * s), msg, font=fm, fill=(*WHITE, int(255 * op)))
+    shadowed(base, lay, 6, .55)
+
+
+# ----------------------------------------------------------------------------
+# Small interface moments: plant note (S11), timer (S13), call (S14)
+# ----------------------------------------------------------------------------
+
+def plant_note(L, base, t, frame, tracks):
+    row = tracks.get(str(frame))
+    t0 = T.PLANT_NOTE['at_s']
+    t1 = T.shot('S11')[3] / T.FPS
+    if not row or not t0 <= t < t1:
+        return
+    s = L.s if L.fmt == 'wide' else 1.0
+    k = spring((t - t0) / .5)
+    op = clamp((t - t0) / .15) * clamp((t1 - t) / .12)
+    x, y = row['plant'][0] * L.W, row['plant'][1] * L.H
+    lay = text_layer(L)
+    d = ImageDraw.Draw(lay)
+    d.ellipse((x - 7 * s, y - 7 * s, x + 7 * s, y + 7 * s), outline=(*AMBER, int(255 * op)), width=max(2, int(3 * s)))
+    lx, ly = x + 90 * s * k, y - 110 * s * k
+    d.line((x + 6 * s, y - 6 * s, lx, ly + 40 * s), fill=(*AMBER, int(220 * op)), width=max(1, int(2 * s)))
+    title, body = T.PLANT_NOTE['title'], T.PLANT_NOTE['body']
+    ft, fb = font(26 * s, 'SemiBold'), font(20 * s, 'Regular')
+    w = max(d.textlength(title, font=ft), d.textlength(body, font=fb)) + 40 * s
+    d.rounded_rectangle((lx, ly, lx + w, ly + 84 * s), radius=int(18 * s), fill=(14, 15, 17, int(205 * op)))
+    d.text((lx + 20 * s, ly + 12 * s), title, font=ft, fill=(*WHITE, int(255 * op)))
+    d.text((lx + 20 * s, ly + 48 * s), body, font=fb, fill=(*AMBER, int(240 * op)))
+    base.alpha_composite(lay)
+    simulated_tag(L, base, lx + 4 * s, ly + 96 * s, op)
+
+
+def timer_chip(L, base, t):
+    t0 = T.TIMER['at_s']
+    t1 = T.shot('S13')[3] / T.FPS
+    if not t0 <= t < t1:
+        return
+    s = L.s if L.fmt == 'wide' else 1.0
+    k = spring((t - t0) / .45)
+    op = clamp((t - t0) / .12) * clamp((t1 - t) / .1)
+    remaining = T.TIMER['minutes'] * 60 - max(0.0, t - t0)
+    label = f"{T.TIMER['label']}   {int(remaining // 60)}:{int(remaining % 60):02d}"
+    fm = font(30 * s, 'SemiBold')
+    lay = text_layer(L)
+    d = ImageDraw.Draw(lay)
+    tw = d.textlength(label, font=fm)
+    w, h = tw + 110 * s, 72 * s
+    x = L.W - L.margin - w
+    y = (L.margin * .8 if L.fmt == 'wide' else 150 * s) - (1 - k) * 40 * s
+    pill(d, (x, y, x + w, y + h), (14, 15, 17, int(205 * op)))
+    cx, cy, r = x + 40 * s, y + h / 2, 17 * s
+    d.ellipse((cx - r, cy - r, cx + r, cy + r), outline=(90, 90, 94, int(255 * op)), width=max(2, int(4 * s)))
+    frac = 1 - (t - t0) / (T.TIMER['minutes'] * 60)
+    d.arc((cx - r, cy - r, cx + r, cy + r), -90, -90 + 360 * frac, fill=(*AMBER, int(255 * op)), width=max(2, int(4 * s)))
+    d.text((x + 72 * s, y + 18 * s), label, font=fm, fill=(*WHITE, int(255 * op)))
+    base.alpha_composite(lay)
+    simulated_tag(L, base, x + w - 6 * s, y + h + 12 * s, op, anchor='r')
+
+
+def call_pill(L, base, t):
+    t0 = T.shot('S14')[2] / T.FPS
+    t1 = T.shot('S14')[3] / T.FPS
+    if not t0 <= t < t1:
+        return
+    s = L.s if L.fmt == 'wide' else 1.0
+    k = spring((t - t0 - .1) / .45)
+    op = clamp((t - t0) / .15) * clamp((t1 - t) / .1)
+    lay = text_layer(L)
+    d = ImageDraw.Draw(lay)
+    fn, fl = font(26 * s, 'SemiBold'), font(19 * s, 'Regular')
+    secs = 154 + int(t - t0)
+    sub = f"{T.CALL['label']}  ·  {secs // 60}:{secs % 60:02d}"
+    w = max(d.textlength(T.CALL['name'], font=fn), d.textlength(sub, font=fl)) + 120 * s
+    h = 82 * s
+    x = L.W / 2 - w / 2
+    y = (L.margin * .8 if L.fmt == 'wide' else 150 * s) - (1 - k) * 40 * s
+    pill(d, (x, y, x + w, y + h), (14, 15, 17, int(210 * op)))
+    r = 28 * s
+    cx, cy = x + 14 * s + r, y + h / 2
+    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=(*AMBER, int(255 * op)))
+    d.text((cx, cy - 1 * s), 'G', font=font(28 * s, 'SemiBold'), fill=(255, 255, 255, int(255 * op)), anchor='mm')
+    d.ellipse((cx + r * .55, cy + r * .5, cx + r * .55 + 14 * s, cy + r * .5 + 14 * s), fill=(70, 190, 100, int(255 * op)))
+    d.text((x + 2 * r + 30 * s, y + 12 * s), T.CALL['name'], font=fn, fill=(*WHITE, int(255 * op)))
+    d.text((x + 2 * r + 30 * s, y + 46 * s), sub, font=fl, fill=(200, 200, 204, int(255 * op)))
+    base.alpha_composite(lay)
+    simulated_tag(L, base, L.W / 2, y + h + 12 * s, op, anchor='m')
+
+
+# ----------------------------------------------------------------------------
+# End card
+# ----------------------------------------------------------------------------
+
 def end_card(L, base, t):
     s = L.s if L.fmt == 'wide' else 1.0
-    t0 = 27.0
+    t0 = T.END_CARD_S
     lay = text_layer(L)
     d = ImageDraw.Draw(lay)
     size = (230 if L.fmt == 'wide' else 200) * s
@@ -416,10 +622,9 @@ def end_card(L, base, t):
         if k > 0:
             d.text((x, y + (1 - k) * size * .22), ch, font=fnt, fill=(*WHITE, int(255 * k)))
         x += wd + tracking * size
-    k = ease_out((t - 28.25) / .5)
-    sub = 'A floating AI companion.'
-    d.text((L.W / 2, y + size * 1.22), sub, font=font(42 * s, 'Regular'), fill=(*WHITE, int(235 * k)), anchor='ma')
-    k2 = ease_out((t - 28.6) / .5)
+    k = ease_out((t - t0 - 1.25) / .5)
+    d.text((L.W / 2, y + size * 1.22), 'A floating AI companion.', font=font(42 * s, 'Regular'), fill=(*WHITE, int(235 * k)), anchor='ma')
+    k2 = ease_out((t - t0 - 1.6) / .5)
     cta = 'Follow the build  →'
     cf = font(26 * s, 'SemiBold')
     cwid = d.textlength(cta, font=cf)
@@ -428,7 +633,7 @@ def end_card(L, base, t):
     d.rounded_rectangle((L.W / 2 - cwid / 2 - padx, py, L.W / 2 + cwid / 2 + padx, py + cf.size + 2 * pady),
                         radius=int((cf.size + 2 * pady) / 2), outline=(*AMBER, int(255 * k2)), width=max(2, int(2 * s)))
     d.text((L.W / 2, py + pady - 2 * s), cta, font=cf, fill=(*AMBER, int(255 * k2)), anchor='ma')
-    k3 = ease_out((t - 28.4) / .5)
+    k3 = ease_out((t - t0 - 1.4) / .5)
     lines = ['CGI concept visualization of a proposed product.', 'Not footage of a working prototype.'] \
         if L.fmt == 'feed' else ['CGI concept visualization of a proposed product. Not footage of a working prototype.']
     for i, ln in enumerate(lines):
@@ -438,12 +643,11 @@ def end_card(L, base, t):
 
 
 def end_background(img, t):
-    k = ease_out((t - 27.0) / .45)
+    k = ease_out((t - T.END_CARD_S) / .45)
     if k <= 0:
         return img
     blur = cv2.GaussianBlur(img, (0, 0), 9 * img.shape[1] / 1920)
-    out = img * (1 - k) + blur * k
-    return out * (1 - .58 * k)
+    return (img * (1 - k) + blur * k) * (1 - .58 * k)
 
 
 # ----------------------------------------------------------------------------
@@ -461,6 +665,48 @@ def plate_frames(path, L, count):
     return frames[:count].astype(np.float32) / 255
 
 
+def compose(L, f, src, plates, tracks, timing):
+    t = f / T.FPS
+    sid = T.shot_at(f)[0]
+    k = None
+    if sid in plates:
+        f0, pf = plates[sid]
+        img = grade(pf[f - f0].copy(), f, sid)
+    elif sid in T.GRAPHIC_SHOTS:
+        img = app_background(L).copy()
+        img = grade(img, f, sid)
+    else:
+        img = load_frame(src / f'f_{f:04d}.png', L)
+        if sid in ('S03', 'S10'):
+            img, k = pov_treatment(img, f)
+        else:
+            img = grade(img, f, sid)
+    if sid == 'S18':
+        img = end_background(img, t)
+    if f >= T.FRAMES - 10:
+        img = img * ((T.FRAMES - f) / 10) ** 1.5
+    base = Image.fromarray((np.clip(img, 0, 1) * 255 + .5).astype(np.uint8)).convert('RGBA')
+    if sid == 'S03' and sid not in plates:
+        search_overlay(L, base, t, f, tracks, k or .13)
+    elif sid == 'S10' and sid not in plates:
+        live_overlay(L, base, t, f, tracks, k or .13)
+    elif sid == 'S08':
+        app_screen(L, base, t)
+    elif sid == 'S11':
+        plant_note(L, base, t, f, tracks)
+    elif sid == 'S13':
+        timer_chip(L, base, t)
+    elif sid == 'S14':
+        call_pill(L, base, t)
+    titles(L, base, t)
+    chyron(L, base, t)
+    caption(L, base, t, timing)
+    if sid == 'S18':
+        end_card(L, base, t)
+    disclosure_label(L, base, t)
+    return base.convert('RGB')
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--format', choices=['wide', 'feed'], default='wide')
@@ -474,27 +720,13 @@ def main():
     tracks = json.loads(tracks_path.read_text()) if tracks_path.exists() else {}
     timing = json.loads((ROOT / 'assets' / 'voice' / 'timing.json').read_text())
     plates = {}
-    for sid, _, f0, f1, _ in T.SHOTS:
+    for sid, _, f0, f1, _, _ in T.SHOTS:
         for ext in ('mp4', 'mov', 'webm'):
             pp = ROOT / 'plates' / a.format / f'{sid}.{ext}'
             if pp.exists():
                 plates[sid] = (f0, plate_frames(pp, L, f1 - f0))
                 print('plate', sid, pp.name, flush=True)
                 break
-    thumb = None
-    tpath = src / 'f_0300.png'
-    if tpath.exists():
-        im = load_frame(tpath, L)
-        im, k = pov_treatment(im, 300)
-        row = tracks.get('300')
-        if row:
-            kx, ky = distort_point(row['keys'][0] * L.W, row['keys'][1] * L.H, L.W, L.H, k)
-        else:
-            kx, ky = L.W / 2, L.H / 2
-        side = int(L.H * .42)
-        x0 = int(clamp(kx - side / 2, 0, L.W - side))
-        y0 = int(clamp(ky - side / 2, 0, L.H - side))
-        thumb = Image.fromarray((im[y0:y0 + side, x0:x0 + side] * 255).astype(np.uint8))
     only = [int(x) for x in a.frames.split(',') if x] if a.frames else None
     out_path = Path(a.output) if a.output else ROOT / 'renders' / f'{a.format}_{a.quality}_silent.mp4'
     enc = None
@@ -503,34 +735,8 @@ def main():
                                 '-r', str(T.FPS), '-i', '-', '-c:v', 'libx264', '-preset', 'slow', '-crf', '12',
                                 '-pix_fmt', 'yuv444p', '-color_primaries', 'bt709', '-color_trc', 'bt709',
                                 '-colorspace', 'bt709', str(out_path)], stdin=subprocess.PIPE)
-    frames = only if only is not None else range(T.FRAMES)
-    for f in frames:
-        t = f / T.FPS
-        sid = T.shot_at(f)[0]
-        if sid in plates:
-            f0, pf = plates[sid]
-            img = pf[f - f0].copy()
-        else:
-            img = load_frame(src / f'f_{f:04d}.png', L)
-        k = None
-        if sid == 'S06' and sid not in plates:
-            img, k = pov_treatment(img, f)
-        else:
-            img = grade(img, f, sid)
-        if sid == 'S12':
-            img = end_background(img, t)
-        if f >= T.FRAMES - 10:
-            img = img * ((T.FRAMES - f) / 10) ** 1.5
-        base = Image.fromarray((np.clip(img, 0, 1) * 255 + .5).astype(np.uint8)).convert('RGBA')
-        if sid == 'S06':
-            pov_overlay(L, base, t, f, tracks, k or .13)
-        titles(L, base, t)
-        notification(L, base, t, thumb)
-        caption(L, base, t, timing)
-        if sid == 'S12':
-            end_card(L, base, t)
-        disclosure_label(L, base, t)
-        rgb = base.convert('RGB')
+    for f in (only if only is not None else range(T.FRAMES)):
+        rgb = compose(L, f, src, plates, tracks, timing)
         if only is not None:
             qa = ROOT / 'renders' / 'qa'
             qa.mkdir(parents=True, exist_ok=True)
