@@ -94,7 +94,7 @@ git clone -b claude/practical-johnson-6qm853 https://github.com/KyleJKistner/bli
 cd blimpy/marketing/room && bash render_gpu.sh            # both formats
 ```
 
-The script fetches Blender 4.5.14 and Inter (SIL Open Font License) into `.cache/`, renders 96-sample frames with OptiX (adaptive sampling plus OpenImageDenoise, 16-bit PNG, motion blur), and runs finishing and mastering. Results land in `deliverables/`. There are 912 rendered frames per format; the app screen is pure graphics.
+The script fetches Blender 4.5.14 and Inter (SIL Open Font License) into `.cache/`, renders 96-sample frames with OptiX (adaptive sampling plus OpenImageDenoise, 16-bit PNG, motion blur), and runs finishing and mastering. Results land in `deliverables/`. There are 924 rendered frames per format; the 1.5-second app screen is pure graphics.
 
 - **Measured:** on this repository's 4-vCPU build container, final-setting 1080p frames at 48 samples took 437–641 s each. They were already clean after denoising.
 - **Estimated, not measured:** public Cycles benchmarks put an RTX 4090 at roughly 50–80× such a CPU. That suggests about 10–25 s per frame at 96 samples, or 2.5–6.5 hours per format on one GPU.

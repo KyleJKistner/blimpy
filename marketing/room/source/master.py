@@ -66,13 +66,13 @@ def srt(path):
         return f'{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d},{ms % 1000:03d}'
     rows = []
     for i, ln in enumerate(timing['lines'], 1):
-        who = 'FLOAT: ' if ln['who'] == 'float' else ''
+        who = {'float': 'FLOAT: ', 'grandma': 'GRANDMA (via FLOAT): '}.get(ln['who'], '')
         rows.append(f"{i}\n{ts(ln['start_s'])} --> {ts(ln['start_s'] + ln['duration_s'] + .4)}\n{who}{ln['text']}\n")
     path.write_text('\n'.join(rows))
 
 
 def contact_sheet(video, dst, w, h):
-    mids = [(a + b) // 2 for _, _, a, b, _ in T.SHOTS]
+    mids = [(a + b) // 2 for _, _, a, b, _, _ in T.SHOTS]
     sel = '+'.join(f'eq(n\\,{f})' for f in mids)
     tmp = DELIV / '_sheet'
     tmp.mkdir(exist_ok=True)
@@ -86,7 +86,7 @@ def contact_sheet(video, dst, w, h):
     for i, f in enumerate(files):
         x, y = (i % cols) * w, (i // cols) * (h + 26)
         board.paste(Image.open(f), (x, y))
-        sid, name, a, b, _ = T.SHOTS[i]
+        sid, name, a, b, _, _ = T.SHOTS[i]
         d.text((x + 8, y + h + 6), f'{sid} {name}  {a / T.FPS:05.2f}-{b / T.FPS:05.2f}s', fill=(225, 225, 228))
         f.unlink()
     tmp.rmdir()
@@ -105,7 +105,8 @@ def main():
     mastered = ROOT / 'assets' / 'audio' / 'master_48k.wav'
     meas = master_audio(mix, mastered)
     suffix = '' if a.quality == 'final' else f'_{a.quality}'
-    name = f"FLOAT_Room_30s_{'16x9' if a.format == 'wide' else '4x5'}{suffix}.mp4"
+    secs = round(T.FRAMES / T.FPS)
+    name = f"FLOAT_Room_{secs}s_{'16x9' if a.format == 'wide' else '4x5'}{suffix}.mp4"
     out = DELIV / name
     W, H = (1920, 1080) if a.format == 'wide' else (1080, 1350)
     run(['ffmpeg', '-v', 'error', '-y', '-i', str(silent), '-i', str(mastered), '-map', '0:v:0', '-map', '1:a:0',
@@ -121,9 +122,9 @@ def main():
     au = next(s for s in d['streams'] if s['codec_type'] == 'audio')
     checks = {
         'dimensions': (v['width'], v['height']) == (W, H),
-        'fps_24': v['r_frame_rate'] == f'{T.FPS}/1',
-        'frames_720': int(v.get('nb_frames', 0)) == T.FRAMES,
-        'duration_30s': abs(float(d['format']['duration']) - T.FRAMES / T.FPS) < .05,
+        f'fps_{T.FPS}': v['r_frame_rate'] == f'{T.FPS}/1',
+        f'frames_{T.FRAMES}': int(v.get('nb_frames', 0)) == T.FRAMES,
+        f'duration_{secs}s': abs(float(d['format']['duration']) - T.FRAMES / T.FPS) < .05,
         'yuv420p_bt709': v['pix_fmt'] == 'yuv420p' and v.get('color_space') == 'bt709',
         'audio_48k_stereo': int(au['sample_rate']) == 48000 and au['channels'] == 2,
     }
@@ -132,7 +133,7 @@ def main():
     loud = loudness(out)
     checks['loudness_within_1lu'] = abs(loud.get('integrated_lufs', 0) + 14) <= 1.0
     checks['true_peak_below_-0.5'] = loud.get('true_peak_dbtp', 0) <= -.5
-    srt(DELIV / f"FLOAT_Room_30s_captions{suffix}.srt")
+    srt(DELIV / f"FLOAT_Room_{secs}s_captions{suffix}.srt")
     cover = DELIV / out.name.replace('.mp4', '_cover.jpg')
     run(['ffmpeg', '-v', 'error', '-y', '-ss', '9.0', '-i', str(out), '-frames:v', '1', '-q:v', '2', str(cover)])
     sw, sh = (480, 270) if a.format == 'wide' else (270, 338)
