@@ -85,7 +85,13 @@ git clone -b claude/practical-johnson-6qm853 https://github.com/KyleJKistner/bli
 cd blimpy/marketing/room && bash render_gpu.sh            # both formats
 ```
 
-The script fetches Blender 4.5.14 and Inter (SIL Open Font License) into `.cache/`, renders 160-sample frames with OptiX, and runs finishing and mastering. Results land in `deliverables/`. To split frames across several machines, use `SHARD=i/n`, as described in the script header. Sun-beam haze is enabled only on S01, S05, S11 and S12. GPU render time has not been measured from this repository; a 4090 is expected to take on the order of 10–20 s per frame.
+The script fetches Blender 4.5.14 and Inter (SIL Open Font License) into `.cache/`, renders 96-sample frames with OptiX (adaptive sampling plus OpenImageDenoise, 16-bit PNG, motion blur), and runs finishing and mastering. Results land in `deliverables/`.
+
+- **Measured:** on this repository's 4-vCPU build container, final-setting 1080p frames at 48 samples took 437–641 s each. They were already clean after denoising.
+- **Estimated, not measured:** public Cycles benchmarks put an RTX 4090 at roughly 50–80× such a CPU. That suggests about 10–25 s per frame at 96 samples, or 2–5 hours per format on one GPU.
+- **Speeding it up:** a pod with two or four GPUs is used automatically in one process. To split frames across separate machines, use `SHARD=i/n`, as described in the script header.
+- **GPU choice:** pick GPUs with ray-tracing cores (RTX 4090, RTX 5090, L40S). A100 and H100 have none and are a poor fit for Cycles.
+- **Haze:** sun-beam haze is off by default (`--haze on` enables it on S01, S05, S11 and S12). In tests it read as a milky lift rather than visible beams, at roughly 30–40% more render time.
 
 ### Fonts and voices
 
@@ -96,7 +102,8 @@ The script fetches Blender 4.5.14 and Inter (SIL Open Font License) into `.cache
 ## What was checked
 
 - **Preview stills:** every shot, at 640×360 and 24 samples. Overlay layout (captions, titles, notification, POV brackets, end card) was checked on composited stills.
-- **Animatic:** 480×270, 16 samples, no motion blur. Its job is to check timing, camera motion and the edit, not image quality.
+- **Animatic:** 480×270, 16 samples, no motion blur. Its job is to check timing, camera motion and the edit, not image quality. `master.py` QA passed on the animatic master (720 frames, 24 fps, −14.1 LUFS, −1.0 dBTP, full decode).
+- **1080p test frames** (S05 and S09) rendered with final settings on CPU at 48 samples, to check motion blur, denoising and the final render path.
 - **Voice:** each line was transcribed back by Whisper `small.en`; all three match the script word for word.
 - **Score:** levels were measured per second and per stem. Dialogue sits 12–24 dB above the bed while lines play. The spectrogram matches the intended structure (intro, riser, drop at 7 s, breakdown at 13 s, groove at 18 s, logo hit at 27 s). **Not yet listened to by a person.**
 - **Master:** `master.py` asserts dimensions, 24 fps, 720 frames, 30 s, BT.709, 48 kHz stereo, a full decode, −14 ± 1 LUFS and true peak ≤ −0.5 dBTP, and writes a QA JSON.

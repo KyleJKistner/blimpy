@@ -284,8 +284,9 @@ def titles(L, base, t):
             reveal_line(L, base, ti['sub'], m + 4 * s, y + 158 * s, 38 * s, 'Regular', t, ti['at_s'] + .22,
                         color=(232, 228, 220), tracking=0, exit_t=end)
         elif sid == 'S09':
+            # Top right: the unit lifting off rises through the left of frame.
             y = (120 if L.fmt == 'wide' else 150) * s + (88 * s if ti.get('add') else 0)
-            reveal_line(L, base, ti['lines'][0], m, y, 76 * s, 'SemiBold', t, ti['at_s'], exit_t=end)
+            reveal_line(L, base, ti['lines'][0], L.W - m, y, 76 * s, 'SemiBold', t, ti['at_s'], anchor='r', exit_t=end)
         elif sid == 'S11':
             x = L.W * (.56 if L.fmt == 'wide' else .0) + (0 if L.fmt == 'wide' else m)
             y = (L.H * .36 if L.fmt == 'wide' else L.H * .74) + (104 * s if ti.get('add') else 0)

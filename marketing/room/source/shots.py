@@ -225,7 +225,7 @@ def cam_S04(t, u):
 
 def cam_S05(t, u):
     h = hero_state(t)
-    loc = lerp((1.25, -1.62, .58), (-.30, -1.38, .74), smooth(u) * .7 + u * .3)
+    loc = lerp((.85, -1.62, .58), (-.38, -1.38, .74), smooth(u) * .7 + u * .3)
     target = h['pos'] + Vector((.08, 0, -.05))
     return loc, target, 27, 4.0, h['pos'], 3 - 5 * u
 

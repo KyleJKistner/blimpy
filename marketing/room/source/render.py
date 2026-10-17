@@ -26,11 +26,12 @@ QUALITY = {
     'preview': dict(width=640, samples=24, blur=False, haze=False),
     'animatic': dict(width=480, samples=10, blur=False, haze=False),
     'draft': dict(width=960, samples=40, blur=True, haze=False),
-    'final': dict(width=1920, samples=160, blur=True, haze=True),
+    'final': dict(width=1920, samples=96, blur=True, haze=False),
 }
 # End-card background is defocused and darkened under type; it needs fewer samples.
 LOW_SAMPLE_SHOTS = {'S12': .5}
-# Sun-beam haze only where the beams read on screen (it is the costliest effect).
+# Optional sun-beam haze (--haze on). Off by default: in tests it read as a milky lift
+# rather than visible beams, at roughly 30-40% more render time.
 HAZE_SHOTS = {'S01', 'S05', 'S11', 'S12'}
 
 

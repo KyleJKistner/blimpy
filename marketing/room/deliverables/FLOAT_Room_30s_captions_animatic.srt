@@ -1,0 +1,11 @@
+1
+00:00:00,400 --> 00:00:02,323
+Float, have you seen my keys?
+
+2
+00:00:03,250 --> 00:00:04,369
+FLOAT: Let me look.
+
+3
+00:00:13,550 --> 00:00:16,057
+FLOAT: Found them. They slipped between the cushions.
