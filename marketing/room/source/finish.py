@@ -509,7 +509,7 @@ def live_overlay(L, base, t, frame, tracks, k):
             msg = 'All 4 burners off'
             fm = font(24 * s, 'SemiBold')
             tw = d.textlength(msg, font=fm)
-            bx, by = L.W / 2 - tw / 2 - 26 * s, pad + 70 * s
+            bx, by = L.W / 2 - tw / 2 - 26 * s, pad + (70 if L.fmt == 'wide' else 170) * s
             pill(d, (bx, by, bx + tw + 52 * s, by + 48 * s), (14, 15, 17, int(200 * op)))
             d.text((bx + 26 * s, by + 10 * s), msg, font=fm, fill=(*WHITE, int(255 * op)))
     shadowed(base, lay, 6, .55)
