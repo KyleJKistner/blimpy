@@ -1,0 +1,10 @@
+# Generated or large; rebuild with the scripts in source/.
+.cache/
+renders/
+assets/textures/
+assets/audio/*.wav
+plates/wide/
+plates/feed/
+plates/stills/*.png
+deliverables/*.mp4
+deliverables/*.wav

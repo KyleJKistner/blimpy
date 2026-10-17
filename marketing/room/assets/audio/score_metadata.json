@@ -1,0 +1,54 @@
+{
+ "bpm": 120,
+ "key": "D major",
+ "duration_s": 30.0,
+ "sample_rate": 48000,
+ "seed": 20261017,
+ "original_synthesis": true,
+ "stems": [
+  "music",
+  "drums",
+  "effects",
+  "dialogue"
+ ],
+ "kicks": 34,
+ "peak_before_gain": 1.366918220442668,
+ "sections": {
+  "intro": [
+   0,
+   5
+  ],
+  "build": [
+   5,
+   7
+  ],
+  "drop": [
+   7,
+   11
+  ],
+  "search": [
+   11,
+   13
+  ],
+  "found": [
+   13,
+   18
+  ],
+  "shift_change": [
+   18,
+   22
+  ],
+  "lift": [
+   22,
+   24
+  ],
+  "thesis": [
+   24,
+   27
+  ],
+  "end": [
+   27,
+   30
+  ]
+ }
+}

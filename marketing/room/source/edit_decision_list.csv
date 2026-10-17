@@ -1,0 +1,13 @@
+shot,name,first_frame,last_frame,start_s,end_s,beats,purpose
+S01,The ask,0,71,0.0,3.0,6.0,Hook: a mirrored sphere in a sunlit room turns toward a spoken question.
+S02,Listening,72,119,3.0,5.0,4.0,"Product face: lens and amber ring answer ""Let me look."""
+S03,Spin-up,120,143,5.0,6.0,2.0,Detail: guarded fan spins up on the beat.
+S04,Set off,144,167,6.0,7.0,2.0,Detail: low three-quarter as FLOAT sets off; the room curves across the envelope.
+S05,Meet FLOAT,168,263,7.0,11.0,8.0,"Drop: low tracking shot through the sun, title."
+S06,Point of view,264,311,11.0,13.0,4.0,Use case: FLOAT's simulated camera view finds the keys.
+S07,Found,312,383,13.0,16.0,6.0,Payoff: rack focus to the keys; spoken answer.
+S08,On your phone,384,431,16.0,18.0,4.0,Payoff: simulated phone notification.
+S09,Shift change,432,527,18.0,22.0,8.0,"Differentiator: one unit docks, another lifts off."
+S10,Lift,528,575,22.0,24.0,4.0,Energy: low angle as the fresh unit rises.
+S11,In the room,576,647,24.0,27.0,6.0,Thesis line over a backlit beauty shot.
+S12,End card,648,719,27.0,30.0,6.0,"Brand, call to action and concept disclosure."

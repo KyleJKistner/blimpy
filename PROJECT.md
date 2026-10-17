@@ -12,7 +12,8 @@ A helium-assisted AI companion and rotating-dock fleet concept: camera, micropho
 | Parts and procurement | [Component list](engineering/v3/procurement/components_v3.csv) |
 | Physical experiments still required | [Experiment plan](engineering/v3/hardware/EXPERIMENT_PLAN.md) |
 | Camera/audio/network bench starter | [MVP](engineering/mvp/README.md) |
-| Latest 24-second CGI film source | [Momentum](marketing/momentum/README.md) |
+| Latest launch film (30 s, Cycles rebuild) | [Room](marketing/room/README.md) |
+| Previous 24-second CGI film source | [Momentum](marketing/momentum/README.md) |
 | Independent-review handoff | [Opus review brief](reviews/opus/REVIEW_PROMPT.md) |
 
 ## Validation boundary
@@ -51,6 +52,6 @@ Run each engineering test suite from its own folder; the historical revisions in
 (cd engineering/v3 && python -m pytest -q)
 ```
 
-For film rendering, follow [Momentum's rebuild instructions](marketing/momentum/README.md). They require Python dependencies, FFmpeg, working off-screen VTK/EGL, and locally provided Inter Display fonts. **No font files, credentials, private network settings, or third-party API keys are included.** Rendering was not repeated as part of the repository import.
+For film rendering, follow [Room's rendering instructions](marketing/room/README.md#rendering) (Blender 4.5 Cycles; final frames on an NVIDIA GPU via `render_gpu.sh`) or, for the earlier VTK film, [Momentum's rebuild instructions](marketing/momentum/README.md). Both require locally provided Inter Display fonts. **No font files, credentials, private network settings, or third-party API keys are included.** Rendering was not repeated as part of the repository import.
 
 The checksum-verified source transport is retained in `.import/`; its workflow expands ordinary repository files and refuses different existing content. No open-source license is newly granted by this import; third-party dependencies retain their own licenses.
