@@ -7,6 +7,8 @@ Dialogue comes from voice.py (synthetic stock voices).
 
 Writes 48 kHz float WAV stems to ../assets/audio and a pre-master mix.
 Final loudness (-14 LUFS integrated, -1 dBTP) is set by master.py.
+`python source/score.py --music track.wav` keeps the sound design and dialogue
+but replaces the synthesized music with a supplied (licensed) track.
 """
 import json
 import sys
@@ -523,8 +525,29 @@ def limiter(x, ceiling=.89, release=.08):
     return x * g[:, None]
 
 
+def external_music(path):
+    """Use a licensed or commissioned track instead of the synthesized score.
+
+    The track should start on the film's first frame; it is gain-matched to the
+    synthesized music bed and ducked under dialogue like the original.
+    """
+    sr, raw = wavfile.read(path)
+    x = raw.astype(np.float64)
+    if np.issubdtype(raw.dtype, np.integer):
+        x /= np.iinfo(raw.dtype).max
+    if x.ndim == 1:
+        x = np.column_stack((x, x))
+    if sr != SR:
+        x = resample_poly(x, SR, sr, axis=0)
+    x = x[:N]
+    out = np.zeros((N, 2))
+    out[:len(x)] = x[:, :2]
+    return out
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    music_file = sys.argv[sys.argv.index('--music') + 1] if '--music' in sys.argv else None
     arrange()
     sound_design()
     timing = dialogue()
@@ -543,6 +566,12 @@ def main():
     stems = {}
     stems['music'] = (bus['pad'] + bus['keys'] + bus['arp'] + bus['bass'] + wet * .55) * duck[:, None]
     stems['drums'] = bus['drums'] * .72 * duck[:, None] ** .8
+    if music_file:
+        ext = external_music(music_file)
+        ref = np.sqrt(np.mean((stems['music'] + stems['drums']) ** 2))
+        ext *= ref / max(np.sqrt(np.mean(ext ** 2)), 1e-9)
+        stems['music'] = ext * duck[:, None]
+        stems['drums'] = np.zeros((N, 2))
     stems['effects'] = bus['fx'] + bus['ui']
     stems['dialogue'] = bus['dialogue']
     for k in stems:

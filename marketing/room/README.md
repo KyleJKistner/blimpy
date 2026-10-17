@@ -90,6 +90,7 @@ The script fetches Blender 4.5.14 and Inter (SIL Open Font License) into `.cache
 ### Fonts and voices
 
 - **Fonts:** none are committed. Set `FLOAT_FONT_DIR` to a folder containing the Inter Display OTFs (Regular, Medium, SemiBold).
+- **Music:** `python source/score.py --music track.wav` replaces the synthesized score with a supplied (for example licensed) track, gain-matched and ducked under dialogue; sound design and dialogue are kept.
 - **Voices:** the voice WAVs are committed so the GPU host needs no ML stack. To regenerate them, use Python 3.12 with `kokoro`, `soundfile`, `scipy`, espeak-ng and the spaCy `en_core_web_sm` model.
 
 ## What was checked

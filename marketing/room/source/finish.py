@@ -239,9 +239,39 @@ def disclosure_label(L, base, t):
     shadowed(base, lay, 6, .5)
 
 
+def scrim(L, base, side, strength, op, extent=.45):
+    """Soft dark gradient behind type, faded with the type itself."""
+    if op <= 0:
+        return
+    n = int((L.H if side in ('top', 'bottom') else L.W) * extent)
+    ramp = (np.linspace(1, 0, n) ** 1.6 * strength * op * 255).astype(np.uint8)
+    if side == 'bottom':
+        alpha = np.zeros((L.H, L.W), np.uint8)
+        alpha[L.H - n:, :] = ramp[::-1, None]
+    elif side == 'top':
+        alpha = np.zeros((L.H, L.W), np.uint8)
+        alpha[:n, :] = ramp[:, None]
+    elif side == 'right':
+        alpha = np.zeros((L.H, L.W), np.uint8)
+        alpha[:, L.W - n:] = ramp[None, ::-1]
+    else:
+        alpha = np.zeros((L.H, L.W), np.uint8)
+        alpha[:, :n] = ramp[None, :]
+    layer = Image.new('RGBA', (L.W, L.H), (8, 9, 11, 0))
+    layer.putalpha(Image.fromarray(alpha))
+    base.alpha_composite(layer)
+
+
 def titles(L, base, t):
     s = L.s
     m = L.margin
+    # Scrims first, one per title moment, so stacked lines share one gradient.
+    for sid, side, strength, at in [('S05', 'bottom', .55, 7.5), ('S09', 'top', .40, 19.95),
+                                    ('S11', 'right' if L.fmt == 'wide' else 'bottom', .50, 24.25)]:
+        _, _, a, b, _ = next(x for x in T.SHOTS if x[0] == sid)
+        if a / T.FPS <= t < b / T.FPS:
+            scrim(L, base, side, strength, ease_out((t - at + .1) / .5) * clamp((b / T.FPS - t) / .18),
+                  .5 if side in ('left', 'right') else .42)
     for i, ti in enumerate(T.TITLES):
         sid = ti['shot']
         _, _, a, b, _ = next(x for x in T.SHOTS if x[0] == sid)
@@ -249,7 +279,7 @@ def titles(L, base, t):
             continue
         end = b / T.FPS
         if sid == 'S05':
-            y = L.H - (300 if L.fmt == 'wide' else 420) * s
+            y = L.H - (262 if L.fmt == 'wide' else 420) * s
             reveal_line(L, base, ti['lines'][0], m, y, 132 * s, 'SemiBold', t, ti['at_s'], exit_t=end)
             reveal_line(L, base, ti['sub'], m + 4 * s, y + 158 * s, 38 * s, 'Regular', t, ti['at_s'] + .22,
                         color=(232, 228, 220), tracking=0, exit_t=end)
@@ -258,7 +288,7 @@ def titles(L, base, t):
             reveal_line(L, base, ti['lines'][0], m, y, 76 * s, 'SemiBold', t, ti['at_s'], exit_t=end)
         elif sid == 'S11':
             x = L.W * (.56 if L.fmt == 'wide' else .0) + (0 if L.fmt == 'wide' else m)
-            y = (L.H * .36 if L.fmt == 'wide' else L.H * .09) + (104 * s if ti.get('add') else 0)
+            y = (L.H * .36 if L.fmt == 'wide' else L.H * .74) + (104 * s if ti.get('add') else 0)
             col = WHITE if not ti.get('add') else AMBER
             reveal_line(L, base, ti['lines'][0], x, y, 92 * s, 'SemiBold', t, ti['at_s'], color=col, exit_t=end)
 

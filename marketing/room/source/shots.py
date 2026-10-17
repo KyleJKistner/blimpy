@@ -289,7 +289,7 @@ FEED = {
     'S01': dict(lens=1.25, shift_x=-.14), 'S02': dict(lens=1.15, shift_x=.0), 'S03': dict(lens=1.1, shift_x=0),
     'S04': dict(lens=1.1, shift_x=.05), 'S05': dict(lens=1.25, shift_x=.05), 'S06': dict(lens=1.0, shift_x=0),
     'S07': dict(lens=1.15, shift_x=.04), 'S08': dict(lens=1.35, shift_x=-.12), 'S09': dict(lens=1.0, shift_x=0),
-    'S10': dict(lens=1.1, shift_x=0), 'S11': dict(lens=1.25, shift_x=-.12), 'S12': dict(lens=1.2, shift_x=-.12),
+    'S10': dict(lens=1.1, shift_x=0), 'S11': dict(lens=1.05, shift_x=-.04, shift_y=-.13), 'S12': dict(lens=1.2, shift_x=-.12),
 }
 
 
@@ -351,6 +351,7 @@ def bake(H, cam, sid, fmt='wide'):
     states = {'hero': hero_state, 'dock_a': dock_a_state, 'dock_b': dock_b_state}
     cfun = CAMERAS[sid]
     feed = FEED[sid] if fmt == 'feed' else dict(lens=1.0, shift_x=0)
+    shift_y = feed.get('shift_y', 0.0)
     prev = None
     spin_phase = 0.0
     for f in range(a - 1, b + 1):
@@ -375,9 +376,10 @@ def bake(H, cam, sid, fmt='wide'):
         cam.keyframe_insert('rotation_euler', frame=f)
         cam.data.lens = lens * feed['lens']
         cam.data.shift_x = feed['shift_x']
+        cam.data.shift_y = shift_y
         cam.data.dof.focus_distance = max(.05, (Vector(focus) - Vector(loc)).length)
         cam.data.dof.aperture_fstop = fstop
-        for path in ('lens', 'shift_x'):
+        for path in ('lens', 'shift_x', 'shift_y'):
             cam.data.keyframe_insert(path, frame=f)
         cam.data.dof.keyframe_insert('focus_distance', frame=f)
         cam.data.dof.keyframe_insert('aperture_fstop', frame=f)
