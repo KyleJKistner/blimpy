@@ -1,0 +1,35 @@
+1
+00:00:00,300 --> 00:00:02,224
+Float, have you seen my keys?
+
+2
+00:00:02,550 --> 00:00:03,669
+FLOAT: Let me look.
+
+3
+00:00:05,100 --> 00:00:07,061
+FLOAT: Found them. Between the cushions.
+
+4
+00:00:12,100 --> 00:00:13,892
+Did I leave the stove on?
+
+5
+00:00:15,250 --> 00:00:17,007
+FLOAT: All four burners are off.
+
+6
+00:00:17,700 --> 00:00:19,626
+FLOAT: Your olive tree looks thirsty.
+
+7
+00:00:20,450 --> 00:00:21,753
+What's next?
+
+8
+00:00:21,500 --> 00:00:24,256
+FLOAT: Two cloves of garlic. I'll time the simmer.
+
+9
+00:00:24,450 --> 00:00:26,821
+GRANDMA (via FLOAT): Did you draw that? It's beautiful!

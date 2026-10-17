@@ -1,0 +1,41 @@
+{
+ "file": "FLOAT_Room_40s_16x9_animatic.mp4",
+ "bytes": 138129190,
+ "width": 1920,
+ "height": 1080,
+ "fps": 24,
+ "frames": 960,
+ "duration_s": 40.0,
+ "video": "h264 High yuv420p",
+ "audio": "aac 48000 Hz 2 ch",
+ "loudnorm_first_pass": {
+  "input_i": "-20.36",
+  "input_tp": "-1.91",
+  "input_lra": "3.60",
+  "input_thresh": "-30.59",
+  "output_i": "-14.66",
+  "output_tp": "-1.00",
+  "output_lra": "3.00",
+  "output_thresh": "-24.80",
+  "normalization_type": "dynamic",
+  "target_offset": "0.66"
+ },
+ "measured": {
+  "integrated_lufs": -14.2,
+  "lra_lu": 3.4,
+  "true_peak_dbtp": -1.0
+ },
+ "checks": {
+  "dimensions": true,
+  "fps_24": true,
+  "frames_960": true,
+  "duration_40s": true,
+  "yuv420p_bt709": true,
+  "audio_48k_stereo": true,
+  "full_decode": true,
+  "loudness_within_1lu": true,
+  "true_peak_below_-0.5": true
+ },
+ "concept_label": "burned in on every frame before the end card; end card carries full disclosure",
+ "status": "CGI concept visualization, not prototype footage"
+}
