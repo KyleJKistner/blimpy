@@ -714,7 +714,8 @@ def build_lighting(coll, sun_elev=17, sun_az=33, volumetric=False):
     return so, None
 
 
-def configure_render(width, height, samples, gpu=False, motion_blur=True, fps=24, film_grade='AgX - Medium High Contrast'):
+def configure_render(width, height, samples, gpu=False, motion_blur=True, fps=24, film_grade='AgX - Medium High Contrast',
+                     deep=False):
     sc = bpy.context.scene
     sc.render.engine = 'CYCLES'
     sc.render.fps = fps
@@ -769,7 +770,7 @@ def configure_render(width, height, samples, gpu=False, motion_blur=True, fps=24
     sc.view_settings.exposure = 0.0
     sc.render.image_settings.file_format = 'PNG'
     sc.render.image_settings.color_mode = 'RGB'
-    sc.render.image_settings.color_depth = '16' if samples >= 128 else '8'
+    sc.render.image_settings.color_depth = '16' if deep else '8'       # 16-bit for finals: grading headroom
     sc.render.image_settings.compression = 35
     sc.render.dither_intensity = 1.0
     sc.render.film_transparent = False

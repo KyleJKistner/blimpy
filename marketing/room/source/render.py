@@ -84,7 +84,7 @@ def main():
         w, h = round(q['width'] * 1080 / 1920 / 2) * 2, round(q['width'] * 1350 / 1920 / 2) * 2
     H = S.build(volumetric=haze)
     samples = a.samples or q['samples']
-    S.configure_render(w, h, samples, gpu=a.gpu, motion_blur=q['blur'])
+    S.configure_render(w, h, samples, gpu=a.gpu, motion_blur=q['blur'], deep=a.quality == 'final')
     cam = bpy.data.objects.new('camera', bpy.data.cameras.new('camera'))
     bpy.context.scene.collection.objects.link(cam)
     bpy.context.scene.camera = cam
